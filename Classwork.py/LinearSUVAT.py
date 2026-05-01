@@ -67,3 +67,4 @@ v = u - a*t
 
 u = v - a*t # no u no s
 u = ((s/t) + ((-0.5*a)*t)) # no u no v
+
