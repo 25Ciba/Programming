@@ -12,11 +12,12 @@ def animate():
         sys.stdout.write('\rloading ' + c)
         sys.stdout.flush()
         time.sleep(0.1)
-    sys.stdout.write('\rDone!     ')
+    sys.stdout.write('\rDone!     ') #You can get rid of this whole line so it just
+                                     #looks like the loading has finished no sign after so it is coherent in other code
 
 t = threading.Thread(target=animate)
 t.start()
 
 #long process here
-time.sleep(10)
+time.sleep(3)
 done = True
