@@ -24,7 +24,65 @@ def LinearSUVAT():
             s = (((u**2)+(v**2)) / (2*a))
             print(s)
     elif solve == 'U':
-        if u == 'NA' and 
+        if u == 'NA' and s =='NA':
+            u = (v - (a*t))
+            print(u)
+        elif u == 'NA' and v == 'NA':
+            u = ((s - (a*(t**2))) / (2*t))
+            print(u)
+        elif u == 'NA' and a == 'NA':
+            u = ((2*s) / t ) + v)
+             print(u)
+        elif u == 'NA' and t == 'NA':
+            u = (((2*(a*s)) - v**2)**0.5)
+            print(u)
+    elif solve == 'V':
+        if v == 'NA' and s == 'NA':
+            v = (u + (a*t))
+            print(v)
+        elif if v == 'NA' and u == 'NA':
+            v = ((s + (a*(t**2))) / 2*t )
+            print(v)
+        elif v == 'NA' and a == 'NA':
+            v = (((2*t) / t) - u)
+            print(v)
+        elif v == 'NA' and t == 'NA':
+            v = (((u**2) + (2(a*s)))**0.5)
+            print(v)
+        
+        #These
+
+        elif solve == 'A':
+        if a == 'NA' and s == 'NA':
+            a = 
+            print(a)
+        elif if a == 'NA' and u == 'NA':
+            a =
+            print(a)
+        elif a == 'NA' and v == 'NA':
+            a = 
+            print(a)
+        elif a == 'NA' and t == 'NA':
+            a = 
+            print(a)
+
+        elif solve == 'T':
+        if t == 'NA' and s == 'NA':
+            t = 
+            print(t)
+        elif if t == 'NA' and u == 'NA':
+            t =
+            print(t)
+        elif t == 'NA' and v == 'NA':
+            t = 
+            print(t)
+        elif t == 'NA' and a == 'NA':
+            t = 
+            print(t)
+
+        ##
+         
+
         
          
         
@@ -67,4 +125,5 @@ v = u - a*t
 
 u = v - a*t # no u no s
 u = ((s/t) + ((-0.5*a)*t)) # no u no v
+u = 
 
