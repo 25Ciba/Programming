@@ -42,7 +42,7 @@ class Bank():
         self.balance += mula
         Bank.bankTotal += mula 
         print(f"Deposited £{mula}. New balance: £{self.balance}")
-        print(f"- Bank loses: £{mula}")
+        print(f"- Bank gains: £{mula}")
         print(f"- Current Bank balance £{Bank.bankTotal}") 
 
 #-----------------------------------------------------------
@@ -93,17 +93,19 @@ def findAccount(name):
 
 def animate():
     done = False
-    def animate():
+    def loading():
+        nonlocal done
         for c in itertools.cycle(['|', '/', '-', '\\']):
             if done:
                 break
             sys.stdout.write('\rloading ' + c)
             sys.stdout.flush()
             time.sleep(0.1)
-    t = threading.Thread(target=animate)
+    t = threading.Thread(target=loading)
     t.start()
     time.sleep(2)
     done = True
+    t.join()
 
 
 def addAccountS():
@@ -120,6 +122,7 @@ def CheckIn():
     found = False
     for account in AccountS:
         if accountName == account.getAccount().lower():
+            animate()
             print(f"Welcome back {account.getAccount()}!")
             found = True
             break
@@ -137,9 +140,42 @@ def CheckBal():
     accName = get_input("Enter account holder name/ID: ")
     account = findAccount(accName) 
     if account:
+        animate()
         account.getBal()
     else:
         print("You are not registered with this bank")
+
+def depositMoney():
+    name = get_input("Enter account name: ")
+    account = findAccount(name)
+    if account:
+        try:
+            amount = int(input("Enter amount to deposit: "))
+            if amount <= 0:
+                print("Enter a valid amount.")
+                return
+            account.deposit(amount)
+            animate()
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+    else:
+        print("Account not found")
+
+def withdrawMoney():
+    name = get_input("Enter account name: ")
+    account = findAccount(name)
+    if account:
+        try:
+            amount = int(input("Enter amount to withdraw: "))
+            if amount <= 0:
+                print("Enter a valid amount.")
+                return
+            account.withdraw(amount)
+            animate()
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+    else:
+        print("Account not found")
 
 def menuChoice():
     CheckIn()
@@ -158,9 +194,9 @@ def menuChoice():
         if choice == '1':
             addAccountS()
         elif choice == '2':
-            print("Deposit not implemented yet")
+            depositMoney()
         elif choice == '3':
-            print("Withdraw not implemented yet")
+            withdrawMoney()
         elif choice == '4':
             CheckBal()
         elif choice == '5':
@@ -172,7 +208,7 @@ def menuChoice():
 #-----------------------------------------------------------
                     ##############
                     #MAIN PROGRAM#
-                    ##############
+                    #############
 #-----------------------------------------------------------
 
 menuChoice()  
