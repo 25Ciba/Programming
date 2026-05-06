@@ -16,7 +16,7 @@ class Bank():
 
     def getBal(self):
         print(f"Account holder: {self.account}")
-        print(f"Current balance: ${self.balance}")
+        print(f"Current balance: £{self.balance}")
 
     def getAccount(self):
         return self.account
