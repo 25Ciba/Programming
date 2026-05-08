@@ -59,7 +59,7 @@ ItemS = [
 class Purchases(Customer, Products):
 
     #Constructor
-    def __init__(self, ID, Bal, items, itemPrice,)
+    def __init__(self, ID, Bal, items, itemPrice)
 
 
 
