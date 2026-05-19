@@ -62,9 +62,21 @@ class Human():
 #
 #Idk how to make memories, echoes, aspects, attributes, have both str and int values and how to relay their function when in battle
 
-        
+Human = [
+    [Name, attack, dmg of attack, mana usage]
+
+]  
+
+Attack = [
+    []
+]
 
 
+
+
+from random import choice
+
+person1 = Human[]
 
 
 
