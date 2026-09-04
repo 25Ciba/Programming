@@ -21,6 +21,8 @@ class Player():
         self.CurrentVision = 5
         self.Vision = 5
         self.Speed = 2
+        self.x = x
+        self.y = y
     
     #Methods
 
@@ -82,18 +84,9 @@ class Player():
         else:
             self.CurrentVision = self.Vision
 
+# need tomake object class that works with the code above^^
 
-
-    #Choose Clan
-
- 
-
+#need to figure out how the walls and map will be made
 
 
 
-
-class Inventory():
-
-class Item():
-
-class
