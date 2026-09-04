@@ -1,4 +1,5 @@
 import random
+
 def NormalMode():
     global num1
     num1 = str(random.randint(1000,10000))
