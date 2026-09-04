@@ -57,7 +57,7 @@ class Player():
 
         self.Experience = self.Experience + amount
 
-        if self.Experience = 10:
+        if self.Experience == 10:
             self.Level = self.Level + 1
 
 
