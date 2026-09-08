@@ -4,7 +4,8 @@ import sys
 
 
 
-
+# Link for creating a good player clasas:
+#https://stackoverflow.com/questions/20044791/how-to-make-an-enemy-follow-the
 
 class Player():
 

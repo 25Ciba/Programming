@@ -49,3 +49,11 @@ while running:
 
 #############
 pg.quit()
+
+
+
+
+
+# This is a good link for enemy tracking:
+#https://stackoverflow.com/questions/20044791/how-to-make-an-enemy-follow-the-player-in-pygame
+
