@@ -15,7 +15,7 @@ dt = 0
 #Player Settings
 player_pos = pg.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 player_speed = 5
-vision_radius = 250
+vision_radius = 150
 player_color = (137, 207, 240)
 
 ###
