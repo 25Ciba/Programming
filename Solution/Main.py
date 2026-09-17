@@ -29,13 +29,13 @@ while running:
   #Player Creation + Movement
   pg.draw.circle(screen, player_color, player_pos, 15)
   keys = pg.key.get_pressed()
-  if keys[pg.K_w]:
+  if keys[pg.K_w] or keys[pg.K_UP]:
       player_pos.y -= 300 * dt
-  if keys[pg.K_s]:
+  if keys[pg.K_s] or keys[pg.K_DOWN]:
       player_pos.y += 300 * dt
-  if keys[pg.K_a]:
+  if keys[pg.K_a] or keys[pg.K_LEFT]:
       player_pos.x -= 300 * dt
-  if keys[pg.K_d]:
+  if keys[pg.K_d] or keys[pg.K_RIGHT]:
       player_pos.x += 300 * dt
 
   fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)

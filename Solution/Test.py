@@ -6,25 +6,21 @@
 #inventory
 #equip item
 #story cutscene
-class Player():
-
-    def __init__(player.x, player.y, 
-    
-    )
+import pygame as pg
+import Main
 
 
 class Player():
-    def __init__(self, playerX, PlayerY, speed, colour, size, screen):
+    def __init__(self, playerX, playerY):
         self.x = playerX
         self.y = playerY
         self.speed = 5
         self.colour = (137, 207, 240)
         self.size = 15
         self.visionRadius = 150
-        self.screen = screen
 
-     def render(self):
-        pygame.draw.circle(self.screen, self.colour, (self.x, self.y, self.size, self.size)) #use the given screen
+    def render(self):
+        pg.draw.circle(self.screen, self.colour, (Main.screen.get_width() / 2, Main.screen.get_height() / 2), self.size)
 
 class Proximity():
 
