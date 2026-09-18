@@ -1,9 +1,10 @@
-
+global teams, scores, addpoint, inOrder
 
 teams = ["Arsenal", "Aston Villa", "Chelsea", "Liverpool", "Manchester City", "Manchester United", "Newcastle United", "Nottingham Forest", "Tottenham Hotspur", "Everton"]
 scores = [0,0,0,0,0,0,0,0,0,0]
 addpoint = []
 inOrder =[]
+
 
 ###
 
@@ -35,8 +36,25 @@ def UserAddPoints():
 #Display highest point teams in order
 
 def HighestScore():
-    global addpoint,teams,inOrder
-    
+    global addpoint, teams, inOrder
+    for i in range(1,len(addpoint)):
+        inOrder = addpoint[i]
+        pos = i-1
+        while addpoint[pos] > inOrder and pos >= 0:
+            addpoint[pos+1] = addpoint[pos] 
+            pos = pos - 1
+        addpoint[pos + 1] = inOrder
+    print(inOrder)
+
+###
+
+def Try():
+    UserAddPoints()
+    HighestScore()
+
+###
+
+Try()
 
 
 
