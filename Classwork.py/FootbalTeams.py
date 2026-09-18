@@ -48,9 +48,26 @@ def HighestScore():
 ###
 
 def alphatbetSort():
-    
+    for i in range(1,len(teams)):
+        sorter = teams[i]
+        pos = i-1
+        while teams[pos] > sorter and pos >= 0:
+            teams[pos+1] = teams[pos] 
+            pos = pos - 1
+        teams[pos + 1] = sorter
 
+###
 
+# alphatbetSort()
+# AddpointsMatch()
+# HighestScore()
 
-AddpointsMatch()
-HighestScore()
+###
+
+def Menu():
+    alphatbetSort()
+    print('''
+                    ### |WELCOME TO THE TEAM SORTING SYSTEM| ###
+        
+        
+          ''')
