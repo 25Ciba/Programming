@@ -31,6 +31,7 @@ def UserAddPoints():
     scores = addpoint
     print(scores)
 
+
 ###
 
 #Display highest point teams in order
@@ -54,7 +55,14 @@ def Try():
 
 ###
 
-Try()
+# Try()
 
 
 
+#################################
+for i in range (len(teams)):
+    points = int(input(f"Enter points for {teams[i]}: "))
+    scores[i] = points
+
+for i in range (len(teams)):
+    print(teams[i],scores[i])
