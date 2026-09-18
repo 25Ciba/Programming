@@ -2,6 +2,9 @@ import math
 
 #---------------------------------------------------------------------------
 
+
+placeHolder = 0
+
 def LinearSUVAT():
     print("Please input the values which you are aware of. If you do not have a value for this then please type 'NA'. ")
     u = int(input("Please input initial velocity. U: "))
@@ -31,8 +34,8 @@ def LinearSUVAT():
             u = ((s - (a*(t**2))) / (2*t))
             print(u)
         elif u == 'NA' and a == 'NA':
-            u = ((2*s) / t ) + v)
-             print(u)
+            u = (((2*s) / t ) + v)
+            print(u)
         elif u == 'NA' and t == 'NA':
             u = (((2*(a*s)) - v**2)**0.5)
             print(u)
@@ -53,32 +56,32 @@ def LinearSUVAT():
         #These
 
         elif solve == 'A':
-        if a == 'NA' and s == 'NA':
-            a = 
-            print(a)
-        elif if a == 'NA' and u == 'NA':
-            a =
-            print(a)
-        elif a == 'NA' and v == 'NA':
-            a = 
-            print(a)
-        elif a == 'NA' and t == 'NA':
-            a = 
-            print(a)
+            if a == 'NA' and s == 'NA':
+                a = placeHolder
+                print(a)
+            elif if a == 'NA' and u == 'NA':
+                a = placeHolder
+                print(a)
+            elif a == 'NA' and v == 'NA':
+                a = placeHolder
+                print(a)
+            elif a == 'NA' and t == 'NA':
+                a = placeHolder
+                print(a)
 
         elif solve == 'T':
-        if t == 'NA' and s == 'NA':
-            t = 
-            print(t)
-        elif if t == 'NA' and u == 'NA':
-            t =
-            print(t)
-        elif t == 'NA' and v == 'NA':
-            t = 
-            print(t)
-        elif t == 'NA' and a == 'NA':
-            t = 
-            print(t)
+            if t == 'NA' and s == 'NA':
+                t = placeHolder
+                print(t)
+            elif t == 'NA' and u == 'NA':
+                t = placeHolder
+                print(t)
+            elif t == 'NA' and v == 'NA':
+                t = placeHolder
+                print(t)
+            elif t == 'NA' and a == 'NA':
+                t = placeHolder
+                print(t)
 
         ##
          
@@ -125,5 +128,5 @@ v = u - a*t
 
 u = v - a*t # no u no s
 u = ((s/t) + ((-0.5*a)*t)) # no u no v
-u = 
+u = placeHolder
 

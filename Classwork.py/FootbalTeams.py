@@ -1,10 +1,7 @@
-global teams, scores, addpoint, inOrder
+global teams, scores
 
 teams = ["Arsenal", "Aston Villa", "Chelsea", "Liverpool", "Manchester City", "Manchester United", "Newcastle United", "Nottingham Forest", "Tottenham Hotspur", "Everton"]
 scores = [0,0,0,0,0,0,0,0,0,0]
-addpoint = []
-inOrder =[]
-
 
 ###
 
@@ -17,52 +14,43 @@ def ShowScores():
 def ShowTeams():
     for i in range(len(teams)):
         print(teams[i])
+        print(" ")
 
 ###
 
-def UserAddPoints():
-    global scores, addpoint
-    count = 0
-    ShowTeams()
-    while count <= 9:
-        userAddPoints = int(input("Please enter the points for each team in order of names listed: "))
-        addpoint.append(userAddPoints)
-        count = count + 1
-    scores = addpoint
-    print(scores)
-
+def AddpointsMatch():
+    global scores, teams
+    for i in range (len(teams)):
+        points = int(input(f"Enter points for {teams[i]}: "))
+        print(" ")
+        scores[i] = points
 
 ###
 
-#Display highest point teams in order
+def ShowTeamANDScores():
+    global scores, teams
+    for i in range (len(teams)):
+        print(teams[i],scores[i])
+
+###
 
 def HighestScore():
-    global addpoint, teams, inOrder
-    for i in range(1,len(addpoint)):
-        inOrder = addpoint[i]
-        pos = i-1
-        while addpoint[pos] > inOrder and pos >= 0:
-            addpoint[pos+1] = addpoint[pos] 
-            pos = pos - 1
-        addpoint[pos + 1] = inOrder
-    print(inOrder)
+    global teams, scores
+    i = 0
+    Highest = scores[i]
+    for i in range(len(scores)-1):
+        if scores[i-1] >= Highest:
+            Highest = scores[i-1]
+            team = teams[i-1]
+    print(f"Top Score out of all ten teams: {team} with {str(Highest)} points.")
+    print(" ")
 
 ###
 
-def Try():
-    UserAddPoints()
-    HighestScore()
-
-###
-
-# Try()
+def alphatbetSort():
+    
 
 
 
-#################################
-for i in range (len(teams)):
-    points = int(input(f"Enter points for {teams[i]}: "))
-    scores[i] = points
-
-for i in range (len(teams)):
-    print(teams[i],scores[i])
+AddpointsMatch()
+HighestScore()
