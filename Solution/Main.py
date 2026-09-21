@@ -1,24 +1,8 @@
 import pygame as pg
-import math
-import sys
+import MainFunctions
+import Player
 
-pg.init()
-HEIGHT = 1000
-WIDTH = 1000
-screen = pg.display.set_mode((WIDTH, HEIGHT))
-clock = pg.time.Clock()
-running = True
-dt = 0
-
-###
-
-#Player Settings
-player_pos = pg.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-player_speed = 5
-vision_radius = 150
-player_color = (137, 207, 240)
-
-###
+Initial()
 
 while running:
   for event in pg.event.get():
@@ -27,33 +11,19 @@ while running:
   screen.fill((211, 211, 211))
 
   #Player Creation + Movement
-  pg.draw.circle(screen, player_color, player_pos, 15)
-  keys = pg.key.get_pressed()
-  if keys[pg.K_w] or keys[pg.K_UP]:
-      player_pos.y -= 300 * dt
-  if keys[pg.K_s] or keys[pg.K_DOWN]:
-      player_pos.y += 300 * dt
-  if keys[pg.K_a] or keys[pg.K_LEFT]:
-      player_pos.x -= 300 * dt
-  if keys[pg.K_d] or keys[pg.K_RIGHT]:
-      player_pos.x += 300 * dt
-
+  Player.render()
+  Player.keybinds()
+  
   fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
   fog_surface.fill((0, 0, 0, 220))
   pg.draw.circle(
-      fog_surface, (0, 0, 0, 0), player_pos, vision_radius) 
+      fog_surface, (0, 0, 0, 0), Player.pvector2(), Player.pvisionRadius()) 
   screen.blit(fog_surface, (0, 0))
+
 
   pg.display.flip()
   dt =clock.tick(60) / 1000
 
 #############
 pg.quit()
-
-
-
-
-
-# This is a good link for enemy tracking:
-#https://stackoverflow.com/questions/20044791/how-to-make-an-enemy-follow-the-player-in-pygame
 
