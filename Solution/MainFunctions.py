@@ -13,5 +13,3 @@ def Initial():
 
 ###
 
-
-All the Mian. variables are cooked get to that then fix the names of things nnd such
