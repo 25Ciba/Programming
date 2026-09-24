@@ -2,40 +2,6 @@ import pygame
 import math
 import sys
 
-
-
-# Link for creating a good player clasas:
-#https://stackoverflow.com/questions/20044791/how-to-make-an-enemy-follow-the
-
-class Player():
-
-    #Constructor
-    def __init__(self, theName, theCurrentHp, theMaxMana, theCurrentMana, theClan, theSpeed):
-
-        self.Name = None
-        self.MaxHp = 300
-        self.CurrentHp = 150
-        self.MaxMana = 150
-        self.CurrentMana = 100
-        self.Experience = 0
-        self.Level = 0
-        self.Clan = theClan
-        self.CurrentVision = 5
-        self.Vision = 5
-        self.Speed = 2
-        self.x = x
-        self.y = y
-    
-#         health class
-#             function change health
-
-
-# player.health.changehealth(AMOUNT)
-# player = Player(-==-)
-
-# enemy class
-#     def player collision()
-#         player.health
     #Methods
 
     def Modify_Hp(self, amount):

@@ -24,12 +24,7 @@ while running:
     fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
     fog_surface.fill((0, 0, 0, 220))
 
-    pg.draw.circle(
-        fog_surface,
-        (0, 0, 0, 0),
-        player.pvector2(),
-        player.pvisionRadius()
-    )
+    pg.draw.circle(fog_surface,(0, 0, 0, 0),player.pvector2(),player.pvisionRadius())
 
     screen.blit(fog_surface, (0, 0))
     pg.display.flip()
