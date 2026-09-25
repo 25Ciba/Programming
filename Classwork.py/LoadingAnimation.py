@@ -4,7 +4,6 @@ import time
 import sys
 
 done = False
-#here is the animation
 def animate():
     for c in itertools.cycle(['|', '/', '-', '\\']):
         if done:
@@ -12,12 +11,8 @@ def animate():
         sys.stdout.write('\rloading ' + c)
         sys.stdout.flush()
         time.sleep(0.1)
-    sys.stdout.write('\rDone!     ') #You can get rid of this whole line so it just
-                                     #looks like the loading has finished no sign after so it is coherent in other code
-
+    sys.stdout.write('\rDone!     ') 
 t = threading.Thread(target=animate)
 t.start()
-
-#long process here
 time.sleep(3)
 done = True
