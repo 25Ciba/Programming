@@ -41,29 +41,29 @@ while running:
     player.render()
     enemy_manager.render()
 
-    #Hp Bar and display
-    hp_bar_width = 200
-    hp_bar_height = 20
-    hp_percentage = (player.current_hp / player.max_hp)
-    pg.draw.rect(screen, (80, 80, 80), (20, 20, hp_bar_width, hp_bar_height))
-    pg.draw.rect(screen, (50, 200, 50), (20, 20, hp_bar_width * hp_percentage, hp_bar_height))
-    font = pg.font.Font(None, 28)
-    hp_text = font.render(f"HP: {player.current_hp} / {player.max_hp}", True, (0, 0, 0))
-    screen.blit(hp_text,(20, 45))
-
-    #Defence display
-    defence_text = font.render(f"Defence: {player.defence}", True, (0, 0, 0))
-    screen.blit(defence_text,(20, 70))
-
-    #Lives display
-    lives_text = font.render(f"Lives: {player.current_lives} / {player.max_lives}", True, (0, 0, 0))
-    screen.blit(lives_text,(20, 95))
-
     #Fog of War
     fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
     fog_surface.fill((0, 0, 0, 220))
     pg.draw.circle(fog_surface, (0, 0, 0, 0), player.pvector2(), player.pvisionRadius())
     screen.blit(fog_surface, (0, 0))
+
+    #Hp Bar and display
+    hp_bar_width = 200
+    hp_bar_height = 20
+    hp_percentage = (player.current_hp / player.max_hp)
+    pg.draw.rect(screen, (80, 80, 80), (20, 20, hp_bar_width, hp_bar_height))
+    pg.draw.rect(screen, (255, 71, 76), (20, 20, hp_bar_width * hp_percentage, hp_bar_height))
+    font = pg.font.Font(None, 28)
+    hp_text = font.render(f"HP: {player.current_hp} / {player.max_hp}", True, (255, 255, 255))
+    screen.blit(hp_text,(20, 45))
+
+    #Defence display
+    defence_text = font.render(f"Defence: {player.defence}", True, (255, 255, 255))
+    screen.blit(defence_text,(20, 70))
+
+    #Lives display
+    lives_text = font.render(f"Lives: {player.current_lives} / {player.max_lives}", True, (255, 255, 255))
+    screen.blit(lives_text,(20, 95))
 
     #Pg display update
     pg.display.flip()
