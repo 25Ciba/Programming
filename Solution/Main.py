@@ -4,14 +4,13 @@ from Classes import Player, EnemyManager
 ###
 
 pg.init()
-HEIGHT = 1000
-WIDTH = 1000
+HEIGHT = 800
+WIDTH = 1200
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
 running = True
 
 #Create Enemy and Player objects
-
 player = Player(screen)
 enemy_manager = EnemyManager(screen, player)
 
