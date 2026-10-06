@@ -1,4 +1,4 @@
-MAX_SIZE = 100  # Use a constant
+MAX_SIZE = 100 
 queue = []
 front = 0
 rear = -1

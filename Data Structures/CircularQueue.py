@@ -1,4 +1,4 @@
-MAX_SIZE = 100  // Use a constant
+MAX_SIZE = 100
 circular_queue = []
 front = -1
 rear = -1
