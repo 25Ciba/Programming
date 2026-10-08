@@ -1,6 +1,7 @@
 import pygame as pg
 import random
 import math
+import os
 
 HEIGHT = 1000
 WIDTH = 1000
@@ -134,7 +135,7 @@ class Projectile:
 
 # ============================================================
 
-# ENEMY
+# Enemy
 
 class Enemy:
 
@@ -377,3 +378,18 @@ class EnemyManager:
     def render(self):
         for enemy in self.enemies:
             enemy.render()
+    
+# ============================================================
+
+# Background
+
+class Background(pg.sprite.Sprite):
+
+    def __init__(self, image_file, location):
+
+        pg.sprite.Sprite.__init__(self)
+        image_path = os.path.join(os.path.dirname(__file__), image_file)
+        self.image = pg.image.load(image_path).convert()
+        self.image = pg.transform.scale(self.image, (1200, 800))
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = location

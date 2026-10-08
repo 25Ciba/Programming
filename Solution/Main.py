@@ -1,6 +1,8 @@
+import os
+import syss
 import pygame as pg
 from random import randint
-from Classes import Player, EnemyManager
+from Classes import Player, EnemyManager, Background
 
 ###
 
@@ -11,9 +13,10 @@ screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
 running = True
 
-#Create Enemy and Player objects
+#Create objects
 player = Player(screen)
 enemy_manager = EnemyManager(screen, player)
+BackGround = Background("Images/Clouds 4.png", [0,0])
 
 ###
 
@@ -36,6 +39,9 @@ while running:
 
     # Screen Rendering
     screen.fill((211, 211, 211))
+
+    #Background
+    screen.blit(BackGround.image, BackGround.rect)
 
     #Object Rendering
     player.render()
