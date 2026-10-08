@@ -76,7 +76,6 @@ class Player:
     #
 
     def attack_enemies(self, enemies):
-
         if self.attack_cooldown > 0:
             return
         for enemy in enemies:

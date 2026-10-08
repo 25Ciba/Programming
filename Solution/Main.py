@@ -1,5 +1,5 @@
 import os
-import syss
+import sys
 import pygame as pg
 from random import randint
 from Classes import Player, EnemyManager, Background
