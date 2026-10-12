@@ -10,7 +10,7 @@ WIDTH = 1000
 
 #Player
 
-class Player:
+class Player(pygame.sprite.Sprite):
 
     def __init__(self, screen):
 
@@ -30,6 +30,18 @@ class Player:
         self.attack_delay = 0.3
         self.max_lives = 7
         self.current_lives = self.max_lives
+
+
+# Use this to add sprite for main character. Got this from Cameras in pygame git repo that you have saved.
+# Here is the repo: https://github.com/clear-code-projects/Pygame-Cameras.git
+
+# class Player(pygame.sprite.Sprite):
+# 	def __init__(self,pos,group):
+# 		super().__init__(group)
+# 		self.image = pygame.image.load('graphics/player.png').convert_alpha()
+# 		self.rect = self.image.get_rect(center = pos)
+# 		self.direction = pygame.math.Vector2()
+# 		self.speed = 5
 
     ###
 
@@ -90,6 +102,12 @@ class Player:
     def update(self, dt):
         if self.attack_cooldown > 0:
             self.attack_cooldown -= dt
+
+
+# ============================================================
+
+# Camera
+
 
 
 # ============================================================

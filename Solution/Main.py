@@ -5,7 +5,7 @@ from random import randint
 from Classes import Player, EnemyManager, Background
 
 ###
-
+# add this png to randomly generate in th world - Brown_ruins1.png
 pg.init()
 HEIGHT = 800
 WIDTH = 1200
