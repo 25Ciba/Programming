@@ -10,7 +10,7 @@ WIDTH = 1000
 
 #Player
 
-class Player(pygame.sprite.Sprite):
+class Player(pg.sprite.Sprite):
 
     def __init__(self, screen):
 
