@@ -1,27 +1,27 @@
-import os
-import sys
 import pygame as pg
-from random import randint
-from Classes import Player, EnemyManager, Background
+
+from Classes import (Player, EnemyManager, Background, Camera, MAP_WIDTH, MAP_HEIGHT)
+
 
 ###
-# add this png to randomly generate in th world - Brown_ruins1.png
+
 pg.init()
-HEIGHT = 800
 WIDTH = 1200
+HEIGHT = 800
 screen = pg.display.set_mode((WIDTH, HEIGHT))
+pg.display.set_caption("Melody of the Mist")
 clock = pg.time.Clock()
 running = True
 
-#Create objects
+# Create objects
 player = Player(screen)
 enemy_manager = EnemyManager(screen, player)
-BackGround = Background("Images/Clouds 4.png", [0,0])
+background = Background("Images//Structures/Clouds 4.png", MAP_WIDTH, MAP_HEIGHT)
+camera = Camera(screen, MAP_WIDTH, MAP_HEIGHT)
 
 ###
 
 while running:
-
     dt = clock.tick(60) / 1000
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -30,30 +30,30 @@ while running:
             if event.button == 1:
                 player.attack_enemies(enemy_manager.enemies)
 
-    # keep Updating objects
+    # Update objects
     player.update(dt)
     player.keybinds(dt)
     enemy_manager.update(dt)
+    camera.update(player)
     if player.current_lives <= 0:
         running = False
 
-    # Screen Rendering
+    #Screen Rendering
     screen.fill((211, 211, 211))
+    background.render(screen, camera)
 
-    #Background
-    screen.blit(BackGround.image, BackGround.rect)
+    # Object Rendering
+    player.render(camera)
+    enemy_manager.render(camera)
 
-    #Object Rendering
-    player.render()
-    enemy_manager.render()
-
-    #Fog of War
+    # Fog of war
     fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
     fog_surface.fill((0, 0, 0, 220))
-    pg.draw.circle(fog_surface, (0, 0, 0, 0), player.pvector2(), player.pvisionRadius())
+    player_screen_pos = camera.apply(player.x,player.y)
+    pg.draw.circle(fog_surface,(0, 0, 0, 0),player_screen_pos,player.pvisionRadius())
     screen.blit(fog_surface, (0, 0))
 
-    #Hp Bar and display
+    # Health bar
     hp_bar_width = 200
     hp_bar_height = 20
     hp_percentage = (player.current_hp / player.max_hp)
@@ -61,18 +61,18 @@ while running:
     pg.draw.rect(screen, (255, 71, 76), (20, 20, hp_bar_width * hp_percentage, hp_bar_height))
     font = pg.font.Font(None, 28)
     hp_text = font.render(f"HP: {player.current_hp} / {player.max_hp}", True, (255, 255, 255))
-    screen.blit(hp_text,(20, 45))
+    screen.blit(hp_text, (20, 45))
 
-    #Defence display
+    # Defence display
     defence_text = font.render(f"Defence: {player.defence}", True, (255, 255, 255))
-    screen.blit(defence_text,(20, 70))
+    screen.blit(defence_text, (20, 70))
 
-    #Lives display
+    # Lives display
     lives_text = font.render(f"Lives: {player.current_lives} / {player.max_lives}", True, (255, 255, 255))
-    screen.blit(lives_text,(20, 95))
+    screen.blit(lives_text, (20, 95))
 
     #Pg display update
     pg.display.flip()
 
-#Get outa program
+# Quit
 pg.quit()

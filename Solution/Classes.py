@@ -1,22 +1,29 @@
-import pg as pg
+import pygame as pg
 import random
 import math
 import os
 
-HEIGHT = 1000
-WIDTH = 1000
+# ============================================================
 
-#============================================================
+# Screen and world dimensions
 
-#Player
+WIDTH = 1200
+HEIGHT = 800
+MAP_WIDTH = 3000
+MAP_HEIGHT = 2000
+
+# ============================================================
+
+# Player
 
 class Player(pg.sprite.Sprite):
 
     def __init__(self, screen):
+        super().__init__()
 
         self.screen = screen
-        self.x = WIDTH / 2
-        self.y = HEIGHT / 2
+        self.x = MAP_WIDTH / 2
+        self.y = MAP_HEIGHT / 2
         self.speed = 300
         self.colour = (137, 207, 240)
         self.size = 15
@@ -30,11 +37,6 @@ class Player(pg.sprite.Sprite):
         self.attack_delay = 0.3
         self.max_lives = 7
         self.current_lives = self.max_lives
-
-
-# Use this to add sprite for main character. Got this from Cameras in pg git repo that you have saved.
-# Here is the repo: https://github.com/clear-code-projects/pg-Cameras.git
-
 
     ###
 
@@ -50,10 +52,14 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_d] or keys[pg.K_RIGHT]:
             self.x += self.speed * dt
 
+        self.x = max(self.size, min(self.x, MAP_WIDTH - self.size))
+        self.y = max(self.size, min(self.y, MAP_HEIGHT - self.size))
+
     #
 
-    def render(self):
-        pg.draw.circle(self.screen, self.colour, (int(self.x), int(self.y)), self.size)
+    def render(self, camera):
+        screen_position = camera.apply(self.x, self.y)
+        pg.draw.circle(self.screen, self.colour, screen_position, self.size)
 
     #
 
@@ -66,9 +72,10 @@ class Player(pg.sprite.Sprite):
         return self.visionRadius
 
     #
-    
+
     def take_damage(self, incoming_damage):
-        damage_multiplier = self.max_hp / (self.max_hp + self.defence)
+
+        damage_multiplier = (self.max_hp / (self.max_hp + self.defence))
         actual_damage = round(incoming_damage * damage_multiplier)
         actual_damage = max(1, actual_damage)
         self.current_hp = max(0, self.current_hp - actual_damage)
@@ -78,6 +85,7 @@ class Player(pg.sprite.Sprite):
             if self.current_lives > 0:
                 self.current_hp = self.max_hp
         return actual_damage
+
     #
 
     def attack_enemies(self, enemies):
@@ -96,12 +104,44 @@ class Player(pg.sprite.Sprite):
         if self.attack_cooldown > 0:
             self.attack_cooldown -= dt
 
-
 # ============================================================
 
 # Camera
 
+class Camera:
 
+    def __init__(self, screen, world_width, world_height):
+
+        self.screen = screen
+        self.screen_width, self.screen_height = screen.get_size()
+        self.world_width = world_width
+        self.world_height = world_height
+        self.offset = pg.Vector2(0, 0)
+        self.borders = {"left": 200, "right": 200, "top": 100, "bottom": 100}
+
+    ###
+
+    def update(self, player):
+
+        screen_x = player.x - self.offset.x
+        screen_y = player.y - self.offset.y
+        if screen_x < self.borders["left"]:
+            self.offset.x = (player.x - self.borders["left"])
+        elif screen_x > (self.screen_width - self.borders["right"]):
+            self.offset.x = (player.x - (self.screen_width - self.borders["right"]))
+        if screen_y < self.borders["top"]:
+            self.offset.y = (player.y - self.borders["top"])
+        elif screen_y > (self.screen_height - self.borders["bottom"]):
+            self.offset.y = (player.y - (self.screen_height - self.borders["bottom"]))
+        max_offset_x = max(0, self.world_width - self.screen_width)
+        max_offset_y = max(0, self.world_height - self.screen_height)
+        self.offset.x = max(0, min(self.offset.x, max_offset_x))
+        self.offset.y = max(0, min(self.offset.y, max_offset_y))
+
+    #
+
+    def apply(self, x, y):
+        return (round(x - self.offset.x), round(y - self.offset.y))
 
 # ============================================================
 
@@ -123,13 +163,14 @@ class Projectile:
     ###
 
     def update(self, dt):
-        self.x += (self.direction.x* self.speed* dt)
-        self.y += (self.direction.y* self.speed* dt)
+        self.x += self.direction.x * self.speed * dt
+        self.y += self.direction.y * self.speed * dt
 
     #
 
-    def render(self):
-        pg.draw.circle(self.screen, self.colour, (int(self.x), int(self.y)), self.size)
+    def render(self, camera):
+        screen_position = camera.apply(self.x, self.y)
+        pg.draw.circle(self.screen, self.colour, screen_position, self.size)
 
     #
 
@@ -140,8 +181,7 @@ class Projectile:
     #
 
     def is_on_screen(self):
-        return (-50 <= self.x <= WIDTH + 50 and -50 <= self.y <= HEIGHT + 50)
-
+        return (-50 <= self.x <= MAP_WIDTH + 50 and -50 <= self.y <= MAP_HEIGHT + 50)
 
 # ============================================================
 
@@ -154,7 +194,7 @@ class Enemy:
         self.screen = screen
         self.player = player
         self.enemy_type = enemy_type
-        self.x, self.y = (self.random_spawn_position())
+        self.x, self.y = self.random_spawn_position()
         self.set_stats()
         self.attack_cooldown = 0
         self.attack_delay = 1.0
@@ -201,14 +241,14 @@ class Enemy:
         ##
 
         elif self.enemy_type == "Boss":
-            self.max_hp = (self.player.max_hp * 5)
+            self.max_hp = self.player.max_hp * 5
             self.current_hp = self.max_hp
-            self.attack = (self.player.attack * 2)
+            self.attack = self.player.attack * 2
             self.speed = random.randint(120, 160)
             self.size = 40
             self.colour = (180, 30, 30)
             self.attack_range = 50
-            self.attack_type = random.choice(["melee","projectile"])
+            self.attack_type = random.choice(["melee", "projectile"])
 
     #
 
@@ -216,13 +256,13 @@ class Enemy:
 
         side = random.randint(1, 4)
         if side == 1:
-            return (random.randint(0, WIDTH), -50)
+            return (random.randint(0, MAP_WIDTH), -50)
         elif side == 2:
-            return (random.randint(0, WIDTH), HEIGHT + 50)
+            return (random.randint(0, MAP_WIDTH), MAP_HEIGHT + 50)
         elif side == 3:
-            return (-50, random.randint(0, HEIGHT))
+            return (-50, random.randint(0, MAP_HEIGHT))
         else:
-            return (WIDTH + 50, random.randint(0, HEIGHT))
+            return (MAP_WIDTH + 50, random.randint(0, MAP_HEIGHT))
 
     #
 
@@ -242,8 +282,8 @@ class Enemy:
         if direction.length() == 0:
             return
         direction = direction.normalize()
-        self.x += (direction.x * self.speed * dt)
-        self.y += (direction.y * self.speed * dt)
+        self.x += direction.x * self.speed * dt
+        self.y += direction.y * self.speed * dt
 
     #
 
@@ -252,21 +292,15 @@ class Enemy:
         distance = math.hypot(self.player.x - self.x, self.player.y - self.y)
         if self.attack_cooldown > 0:
             return
-
-        ##
-    
         if self.attack_type == "melee":
             collision_distance = (self.attack_range + self.player.size + self.size)
             if distance <= collision_distance:
                 self.player.take_damage(self.attack)
-                self.attack_cooldown = (self.attack_delay)
-
-        ##
-
+                self.attack_cooldown = self.attack_delay
         elif self.attack_type == "projectile":
             if distance <= self.attack_range:
                 self.shoot()
-                self.attack_cooldown = (self.attack_delay)
+                self.attack_cooldown = self.attack_delay
 
     #
 
@@ -285,25 +319,20 @@ class Enemy:
 
         for projectile in self.projectiles[:]:
             projectile.update(dt)
-
-            ##
-
             if projectile.collides_with_player(self.player):
                 self.player.take_damage(projectile.damage)
                 self.projectiles.remove(projectile)
-
-            ##
-
             elif not projectile.is_on_screen():
                 self.projectiles.remove(projectile)
 
     #
 
-    def render(self):
+    def render(self, camera):
 
-        pg.draw.circle(self.screen, self.colour, (int(self.x), int(self.y)), self.size)
+        screen_position = camera.apply(self.x, self.y)
+        pg.draw.circle(self.screen, self.colour, screen_position, self.size)
         for projectile in self.projectiles:
-            projectile.render()
+            projectile.render(camera)
 
     #
 
@@ -330,77 +359,78 @@ class EnemyManager:
         self.spawn_timer = 0
         self.spawn_delay = 2.0
 
-    ####
+    #
 
     def update(self, dt):
 
         self.spawn_timer -= dt
         if self.spawn_timer <= 0:
             self.spawn_enemy()
-            self.spawn_timer = (self.spawn_delay)
-
-        ##
-
+            self.spawn_timer = self.spawn_delay
         for enemy in self.enemies[:]:
             enemy.update(dt)
             if enemy.current_hp <= 0:
                 self.enemies.remove(enemy)
 
-    # ========================================================
-
-    # Spawn Enemy
+    #
 
     def spawn_enemy(self):
 
         roll = random.randint(1, 100)
 
-        ##
-
-        # 70% Common
         if roll <= 70:
             enemy_type = "Common"
 
-        ##
-
-        # 20% Strong
         elif roll <= 90:
             enemy_type = "Strong"
 
-        ##
-
-        # 8% Elite
         elif roll <= 98:
             enemy_type = "Elite"
 
-        ##
-
-        # 2% Boss
         else:
             enemy_type = "Boss"
-
-        ##
 
         enemy = Enemy(self.screen, enemy_type, self.player)
         self.enemies.append(enemy)
 
     #
 
-    def render(self):
+    def render(self, camera):
         for enemy in self.enemies:
-            enemy.render()
-    
+            enemy.render(camera)
+
+
 # ============================================================
 
 # Background
 
-class Background(pg.sprite.Sprite):
+class Background:
 
-    def __init__(self, image_file, location):
+    def __init__(self, image_file, world_width, world_height):
 
-        pg.sprite.Sprite.__init__(self)
-        image_path = os.path.join(os.path.dirname(__file__), image_file)
+        image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),image_file)
         self.image = pg.image.load(image_path).convert()
-        self.image = pg.transform.scale(self.image, (1200, 800))
-        self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = location
+        self.image = pg.transform.scale(self.image, (world_width, world_height))
+        self.rect = self.image.get_rect(topleft=(0, 0))
 
+    #
+
+    def render(self, screen, camera):
+        screen.blit(self.image, camera.apply(self.rect.x, self.rect.y))
+
+# ============================================================
+
+#Random Generation Sprites
+
+
+# class Structures(pygame.sprite.Sprite):
+# 	def __init__(self,pos,group):
+# 		super().__init__(group)
+# 		self.image = pygame.image.load('graphics/tree.png').convert_alpha()
+# 		self.rect = self.image.get_rect(topleft = pos)
+
+#
+
+#Class ---
+
+# ============================================================
