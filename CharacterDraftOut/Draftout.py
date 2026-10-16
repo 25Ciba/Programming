@@ -1,7 +1,58 @@
-#Demon Slayer
-#Blue Lock
+import random
+import itertools
+import threading
+import time
+import sys
 
-####
+class Player(): 
+
+    def __init__(self, Playername, Balance):
+
+        self.name = Playername
+        self.bal = Balance
+
+    def getBal(self):
+        print(f"Account holder: {self.name}")
+        print(f"Current balance: £{self.bal}")
+
+    def pay(self, money):
+
+        if money > self.bal:
+            print("You cannot buy this character currently.")
+        else:
+            self.bal -= money 
+            print(f"Withdrew £ money}. New balance: £{self.bal}")
+
+def addPlayer():
+    inputName = input("Enter account: ").strip()  
+    newPlayer = Player(inputName, 20)
+    Players.append(newplayer)
+    print("Welcome to the game")
+
+def pick():
+    
+
+def gameBegin():
+    Turn = 1
+    addPlayer()
+    addPlayer()
+    while True:
+        print(f"Turn {Turn}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Speed1}
+            Money: {Players[0].getBal}
+
+            """
+        )
+
+
+Players = [
+
+]
+
+#=======================================================
 
 AOT = [
     "Eren Yeager",
@@ -236,6 +287,8 @@ OPM = [
     "Zenko"
 ]
 
+###
+
 SL = [
     "Sung Jin-Woo (The Shadow Monarch)",
     "Sung Il-Hwan (Jin-Woo's Father / Vessel of the Rulers)",
@@ -307,6 +360,8 @@ SL = [
     "Kamish (The Shadow Dragon / Humanity's Greatest Calamity)"
 ]
 
+###
+
 DL = [
     "Tanjirō Kamado", 
     "Nezuko Kamado", 
@@ -346,5 +401,150 @@ DL = [
     "Aoi Kanzaki (Butterfly Mansion Helper)", 
     "Sumi Nakahara (Butterfly Mansion Helper)", 
     "Kiyo Terauchi (Butterfly Mansion Helper)", 
-    "Naho Takada (Butterfly Mansion Helper)", "Sabo (Demon Slayer Cadet)", "Makomo (Demon Slayer Cadet)", "Hotaru Haganezuka (Swordsmith)", "Kozo Kanamori (Swordsmith)", "Kotetsu (Swordsmith Village Resident)", "Tecchin Tecchikawahara (Swordsmith Village Chief)", "Hinatsuru (Tengen's Wife)", "Makuo (Tengen's Wife)", "Suma (Tengen's Wife)", "Kagaya Ubuyashiki (Master of the Mansion)", "Amane Ubuyashiki (Kagaya's Wife)", "Kiriya Ubuyashiki (Kagaya's Son)", "Kanata Ubuyashiki (Kagaya's Daughter)", "Kuina Ubuyashiki (Kagaya's Daughter)", "Nichika Ubuyashiki (Kagaya's Daughter)", "Hinaki Ubuyashiki (Kagaya's Daughter)", "Susamaru (Temari Demon)", "Yahaba (Arrow Demon)", "Spider Demon Mother (Spider Family)", "Spider Demon Father (Spider Family)", "Spider Demon Brother (Spider Family)", "Spider Demon Sister (Spider Family)", "Hand Demon (Final Selection Demon)", "Chachamaru (Tamayo's Cat)", "Ukogi / Chuntaro (Zenitsu's Sparrow)", "Kasugai Crow (Communication Bird)", "Kie Kamado (Tanjirō's Mother)", "Takeo Kamado (Tanjirō's Brother)", "Hanako Kamado (Tanjirō's Sister)", "Shigeru Kamado (Tanjirō's Brother)", "Rokuta Kamado (Tanjirō's Brother)", "Tanjūrō Kamado (Tanjirō's Father)", "Senjūrō Rengoku (Kyōjurō's Brother)", "Ruka Rengoku (Kyōjurō's Mother)", "Kotoha Hashibira (Inosuke's Mother)", "Yuichirō Tokitō (Muichirō's Twin Brother)", "Tsutako Tomioka (Giyū's Sister)"
+    "Naho Takada (Butterfly Mansion Helper)", 
+    "Sabo (Demon Slayer Cadet)", 
+    "Makomo (Demon Slayer Cadet)", 
+    "Hotaru Haganezuka (Swordsmith)", 
+    "Kozo Kanamori (Swordsmith)", 
+    "Kotetsu (Swordsmith Village Resident)", 
+    "Tecchin Tecchikawahara (Swordsmith Village Chief)", 
+    "Hinatsuru (Tengen's Wife)", 
+    "Makuo (Tengen's Wife)", 
+    "Suma (Tengen's Wife)", 
+    "Kagaya Ubuyashiki (Master of the Mansion)", 
+    "Amane Ubuyashiki (Kagaya's Wife)", 
+    "Kiriya Ubuyashiki (Kagaya's Son)", 
+    "Kanata Ubuyashiki (Kagaya's Daughter)", 
+    "Kuina Ubuyashiki (Kagaya's Daughter)", 
+    "Nichika Ubuyashiki (Kagaya's Daughter)", 
+    "Hinaki Ubuyashiki (Kagaya's Daughter)", 
+    "Susamaru (Temari Demon)", 
+    "Yahaba (Arrow Demon)", 
+    "Spider Demon Mother (Spider Family)", 
+    "Spider Demon Father (Spider Family)", 
+    "Spider Demon Brother (Spider Family)", 
+    "Spider Demon Sister (Spider Family)", 
+    "Hand Demon (Final Selection Demon)", 
+    "Kie Kamado (Tanjirō's Mother)", 
+    "Takeo Kamado (Tanjirō's Brother)", 
+    "Hanako Kamado (Tanjirō's Sister)", 
+    "Shigeru Kamado (Tanjirō's Brother)", 
+    "Rokuta Kamado (Tanjirō's Brother)", 
+    "Tanjūrō Kamado (Tanjirō's Father)", 
+    "Senjūrō Rengoku (Kyōjurō's Brother)", 
+    "Ruka Rengoku (Kyōjurō's Mother)", 
+    "Kotoha Hashibira (Inosuke's Mother)", 
+    "Yuichirō Tokitō (Muichirō's Twin Brother)", 
+    "Tsutako Tomioka (Giyū's Sister)"
 ]
+
+###
+
+BL = [
+    "Yoichi Isagi"
+    "Meguru Bachira"
+    "Rensuke Kunigami"
+    "Hyoma Chigiri"
+    "Rin Itoshi"
+    "Sae Itoshi"
+    "Seishiro Nagi"
+    "Reo Mikage"
+    "Zantetsu Tsurugi"
+    "Shouei Barou"
+    "Gin Gagamaru"
+    "Jingo Raichi"
+    "Gurimu Igarashi"
+    "Asahi Naruhaya"
+    "Wataru Kuon"
+    "Okuhito Iemon"
+    "Yudai Imamura"
+    "Ryosuke Kira"
+    "Jin Kiyora"
+    "Ikki Niko"
+    "Junichi Wanima"
+    "Keisuke Wanima"
+    "Ryusei Shidou"
+    "Tabito Karasu"
+    "Eita Otoya"
+    "Kenyu Yukimiya"
+    "Yo Hiyori"
+    "Nijiro Nanase"
+    "Kurona Ranze"
+    "Aoshi Tokimitsu"
+    "Jubei Aryu"
+    "Anri Teieri"
+    "Jinpachi Ego"
+    "Yasuhito Fukaku"
+    "Oliver Aiku"
+    "Shuto Sendo"
+    "Kazuma Niou"
+    "Teppei Neru"
+    "Kento Cho"
+    "Teru Kitsunezato"
+    "Itsuki Wakatsuki"
+    "Haru Hayate"
+    "Taiga Tsunzaki"
+    "Miroku Darai"
+    "Shingen Tanaka"
+    "Noel Noa"
+    "Chris Prince"
+    "Lavinho"
+    "Marc Snuffy"
+    "Julian Loki"
+    "Michael Kaiser"
+    "Alexis Ness"
+    "Benedict Grim"
+    "Erik Gesner"
+    "Mensah"
+    "Birkenstock"
+    "Agi"
+    "Don Lorenzo"
+    "Drago"
+    "Charles Chevalier"
+    "Leonardo Luna"
+    "Pablo Cavasoz"
+    "Adam Blake"
+    "Dada Silva"
+]
+
+#=================================================================
+
+a = random.choice(AOT)
+b = random.choice(JJK)
+c = random.choice(MHA)
+d = random.choice(OPM)
+e = random.choice(SL)
+f = random.choice(DL)
+g = random.choice(BL)
+h = random.choice(AOT)
+i = random.choice(JJK)
+j = random.choice(MHA)
+k = random.choice(OPM)
+l = random.choice(SL)
+m = random.choice(DL)
+n = random.choice(BL)
+
+#
+
+All = [a, b, c, d, e, f, g, h, i, j, k, l, m, n]
+pot = random.shuffle()
+
+#
+
+Speed1 = pot[0]
+speed2 = pot[1]
+Intelligence1 = pot[2]
+Intelligence2 = pot[3]
+Strength1 = pot[4]
+Strength2 = pot[5]
+Defence1 = pot[6]
+Defence2 = pot[7]
+Endurance1 = pot[8]
+Endurance2 = pot[9]
+Ability1 = pot[10]
+Ability2 = pot[11]
+Willpower1 = pot[12]
+Willpower2 = pot[13]
+
+
+
