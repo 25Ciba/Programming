@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import itertools
 import threading
 import time
@@ -21,7 +22,7 @@ class Player():
             print("You cannot buy this character currently.")
         else:
             self.bal -= money 
-            print(f"Withdrew £ money}. New balance: £{self.bal}")
+            print(f"Withdrew £{money}. New balance: £{self.bal}")
 
 def addPlayer():
     inputName = input("Enter account: ").strip()  
@@ -29,24 +30,218 @@ def addPlayer():
     Players.append(newplayer)
     print("Welcome to the game")
 
-def pick():
-    
+#----
+
+def pickP1():
+    value = ("Enter Amount: ")
+    Players[0].pay(value)
+
+def pickP2():
+    value = ("Enter Amount: ")
+    Players[1].pay(value)
+
+#----
 
 def gameBegin():
     Turn = 1
     addPlayer()
     addPlayer()
     while True:
+
+        ####
+
+        #TURN 1
         print(f"Turn {Turn}. {Players[0]}'s First Pick.")
         print(
             f"""
 
             Character: {Speed1}
-            Money: {Players[0].getBal}
+            Money-To-Spend: {Players[0].getBal}
 
             """
         )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn}. {Players[1]}'s First Pick.")
+        print(
+            f"""
 
+            Character: {Speed2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
+
+        ####
+
+        #TURN 2
+        print("============")
+        print(f"Turn {Turn+1}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Intelligence1}
+            Money-To-Spend: {Players[0].getBal}
+
+            """
+        )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn+1}. {Players[1]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Intelligence2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
+
+        ####
+
+        #TURN 3
+        print("============")
+        print(f"Turn {Turn+2}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Strength1}
+            Money-To-Spend: {Players[0].getBal}
+
+            """
+        )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn+2}. {Players[1]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Strength2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
+
+        ####
+
+        #TURN 4
+        print("============")
+        print(f"Turn {Turn+3}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Defence1}
+            Money-To-Spend: {Players[0].getBal}
+
+            """
+        )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn+3}. {Players[1]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Defence2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
+
+        ####
+
+        #TURN 5
+        print("============")
+        print(f"Turn {Turn+4}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Endurance1}
+            Money-To-Spend: {Players[0].getBal}
+
+            """
+        )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn+4}. {Players[1]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Endurance2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
+
+        ####
+
+        #TURN 6
+        print("============")
+        print(f"Turn {Turn+5}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Ability1}
+            Money-To-Spend: {Players[0].getBal}
+
+            """
+        )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn+5}. {Players[1]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Ability2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
+
+        ####
+
+        #TURN 7
+        print("============")
+        print(f"Turn {Turn+6}. {Players[0]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Willpower1}
+            Money-To-Spend: {Players[0].getBal}
+
+            """
+        )
+        print("")
+        pickP1()
+        print("============")
+        print(f"Turn {Turn+6}. {Players[1]}'s First Pick.")
+        print(
+            f"""
+
+            Character: {Willpower2}
+            Money-To-Spend: {Players[1].getBal}
+
+            """
+        )
+        print("")
+        pickP2()
 
 Players = [
 
@@ -526,8 +721,18 @@ n = random.choice(BL)
 
 #
 
+def shuffler(old, new):
+    
+    for i in range(new-1,0,-1):
+        j = random.randint(0,i)
+        old[i], old[j] = old[j], old[i]
+    return old
+
+
+
 All = [a, b, c, d, e, f, g, h, i, j, k, l, m, n]
-pot = random.shuffle()
+pot = []
+pot = random.shuffle(All)
 
 #
 
@@ -548,3 +753,4 @@ Willpower2 = pot[13]
 
 
 
+gameBegin()
