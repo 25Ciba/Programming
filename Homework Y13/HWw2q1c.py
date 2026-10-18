@@ -1,50 +1,57 @@
-MAX_SIZE = 100  // Use a constant
-circular_queue = []
+maxsize = 100
+kBuffer = [None] * maxsize
 front = -1
 rear = -1
+size = 0
 
 ###
 
-def is_empty(front):
-    if front == -1:
+def is_empty(size):
+
+    if size == 0:
         return True
     else:
         return False
 
 #
 
-def is_full(front, rear):
-    if (rear + 1) % MAX_SIZE == front:
+def is_full(size):
+
+    if size == maxsize:
         return True
     else:
         return False
 
 #
 
-def dequeue(queue, front, rear):
-    if is_empty(front) == True:
+def dequeue(kBuffer, front, rear, size):
+
+    if is_empty(size) == True:
         print("\nQueue is empty - nothing to dequeue")
         dequeued_item = None
     else:
-        dequeued_item = queue[front]
-        # Check if the queue is empty
+        dequeued_item = kBuffer[front]
+        kBuffer[front] = None
         if front == rear:
             front = -1
-            rear = -1       
+            rear = -1
         else:
-            front = (front + 1) % MAX_SIZE
-    return dequeued_item, front, rear
+            front = (front + 1) % maxsize
+        size = size - 1
+    return dequeued_item, front, rear, size
 
 #
 
-def enqueue(queue, front, rear, data):
-    if is_full(front, rear) == True:
+def enqueue(kBuffer, front, rear, size, data):
+
+    if is_full(size) == True:
         print(f"\nQueue is full - {data} not added")
     else:
-        rear = (rear + 1) % MAX_SIZE
-        queue[rear] = data
-        if front == -1: # First item to be queued
+        rear = (rear + 1) % maxsize
+        kBuffer[rear] = data
+        if front == -1:
             front = 0
-    return front, rear
+        size = size + 1
+    return front, rear, size
 
 #
