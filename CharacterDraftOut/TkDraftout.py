@@ -3998,6 +3998,9 @@ class AnimeDraftGUI:
 
         self.free_offer_passer = None
 
+        self.solo_passed = []
+        self.forced_choice = False
+
         self.game_finished = False
 
         self.show_setup()
@@ -4147,6 +4150,9 @@ class AnimeDraftGUI:
 
         self.free_offer_passer = None
 
+        self.solo_passed = []
+        self.forced_choice = False
+
         self.game_finished = False
 
         self.show_game()
@@ -4269,6 +4275,9 @@ class AnimeDraftGUI:
 
         self.anime_tag_label.pack(pady=(12, 8))
 
+        # This panel covers the character card only while a choice is required.
+        self.choice_frame = tk.Frame(self.character_card, bg=PANEL_ALT, padx=8, pady=4)
+
         self.status_label = self.make_label(center, "", 10, MUTED, bg=PANEL,
 
                                             wraplength=470, justify="center")
@@ -4357,6 +4366,9 @@ class AnimeDraftGUI:
 
         self.free_offer_passer = None
 
+        if self.forced_choice:
+            return
+
         if all(not player.has_empty_slots() for player in self.players):
 
             self.finish_game()
@@ -4372,6 +4384,10 @@ class AnimeDraftGUI:
             attempts += 1
 
         if not self.character_pool:
+
+            if self.solo_passed:
+                self.show_passed_choices()
+                return
 
             self.finish_game(pool_exhausted=True)
 
@@ -4463,6 +4479,17 @@ class AnimeDraftGUI:
 
             self.bid_entry.focus_set()
 
+        if self.is_solo_turn():
+            passed = len(self.solo_passed)
+            self.turn_label.config(text=f"{player.name.upper()}'S FINAL SELECTIONS", fg=player_color)
+            self.status_label.config(
+                text=f"Take this character for free, or pass. {passed}/5 passes used for this slot. "
+                     "After 5 passes, you must choose one of those 5 characters.", fg=GOLD)
+            self.buy_button.config(text="TAKE FREE", state="normal")
+            self.pass_button.config(text=f"PASS ({passed}/5)", state="normal")
+            self.bid_entry.config(state="disabled")
+            self.buy_button.focus_set()
+
         self.update_builds()
 
     #
@@ -4473,6 +4500,13 @@ class AnimeDraftGUI:
 
         if self.game_finished or self.current_character is None:
 
+            return
+
+        if self.forced_choice:
+            return
+
+        if self.is_solo_turn():
+            self.award_character(self.current_player_index, 0)
             return
 
         if self.free_offer_passer is not None:
@@ -4545,6 +4579,8 @@ class AnimeDraftGUI:
         """Settle the bid or show a free offer inside the character card."""
         if self.game_finished or self.current_character is None:
             return
+        if self.forced_choice:
+            return
         if self.free_offer_passer is not None:
             self.resolve_free_offer(False)
             return
@@ -4556,8 +4592,14 @@ class AnimeDraftGUI:
         other_index = 1 - passer_index
         other = self.players[other_index]
         if not other.has_empty_slots():
-            self.log_label.config(text=f"{other.name} has no empty slots. Character skipped.")
-            self.prepare_turn()
+            self.solo_passed.append(self.current_character)
+            self.log_label.config(
+                text=f"{self.players[passer_index].name} passed on {self.current_character['name']}. "
+                     f"Saved {len(self.solo_passed)}/5 choices.", fg=MUTED)
+            if len(self.solo_passed) >= 5 or not self.character_pool:
+                self.show_passed_choices()
+            else:
+                self.prepare_turn()
             return
 
         self.free_offer_passer = passer_index
@@ -4571,6 +4613,48 @@ class AnimeDraftGUI:
         self.buy_button.config(text="TAKE FREE", state="normal")
         self.pass_button.config(text="DECLINE", state="normal")
         self.buy_button.focus_set()
+
+    def is_solo_turn(self):
+        """Only the current player still has an unfilled stat slot."""
+        return (self.players[self.current_player_index].has_empty_slots()
+                and not self.players[1 - self.current_player_index].has_empty_slots())
+
+    def show_passed_choices(self):
+        """Require a choice from the saved passes in the main game window."""
+        if self.game_finished or not self.solo_passed or not self.is_solo_turn():
+            return
+        self.forced_choice = True
+        player = self.players[self.current_player_index]
+        self.turn_label.config(text=f"{player.name.upper()} — CHOOSE ONE", fg=PLAYER_COLORS[self.current_player_index])
+        self.slot_label.config(text=f"Choose for: {player.next_slot()}")
+        self.status_label.config(
+            text=f"Choose one of your {len(self.solo_passed)} passed characters for free. "
+                 "You must choose before continuing.", fg=GOLD)
+        self.buy_button.config(state="disabled")
+        self.pass_button.config(state="disabled")
+        self.bid_entry.config(state="disabled")
+        for widget in self.choice_frame.winfo_children():
+            widget.destroy()
+        self.make_label(self.choice_frame, "YOUR PASSED CHARACTERS · PICK ONE", 10, GOLD, True).pack(pady=(0, 4))
+        for index, character in enumerate(self.solo_passed):
+            button = self.make_button(
+                self.choice_frame,
+                f"{index + 1}. {character['name']} [{character['anime']}]",
+                lambda choice=index: self.choose_passed_character(choice),
+                bg=PANEL, fg=TEXT, wraplength=400, justify="left", anchor="w")
+            button.config(font=("Segoe UI", 9), pady=6)
+            button.pack(fill="both", expand=True, pady=2)
+            if index == 0:
+                button.focus_set()
+        self.choice_frame.place(x=0, y=0, relwidth=1, relheight=1)
+        self.choice_frame.lift()
+
+    def choose_passed_character(self, index):
+        if (self.game_finished or not self.forced_choice or not self.is_solo_turn()
+                or not isinstance(index, int) or not 0 <= index < len(self.solo_passed)):
+            return
+        self.current_character = self.solo_passed[index]
+        self.award_character(self.current_player_index, 0)
 
     def resolve_free_offer(self, accept):
         """Resolve the on-screen offer once, preserving the original turn rules."""
@@ -4605,6 +4689,10 @@ class AnimeDraftGUI:
             return
 
         winner.add_character(slot, character, cost)
+
+        self.solo_passed = []
+        self.forced_choice = False
+        self.choice_frame.place_forget()
 
         self.log_label.config(
 
