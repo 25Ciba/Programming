@@ -27,7 +27,7 @@ for i in range(answers):
 
 if CountA > CountB and CountA > CountB:
     print(CountA)
-if CountA > CountB and CountA > CountB: #ect
-    print(CountA)
-if CountA > CountB and CountA > CountB: #ect
-    print(CountA)
+if CountB > CountA and CountB > CountC: #ect
+    print(CountB)
+if CountC > CountA and CountC > CountB: #ect
+    print(CountC)
