@@ -7,7 +7,7 @@ import os
 
 # Screen and world dimensions
 
-TILE_SIZE = 32 # Tiles are scaled to 200% (from 16 px).
+TILE_SIZE = 32
 GRID_WIDTH = 150
 GRID_HEIGHT = 110
 MAP_WIDTH = GRID_WIDTH * TILE_SIZE
@@ -61,7 +61,6 @@ class DungeonMap:
     def __init__(self):
 
         self.rooms = [
-
             ("start", "Whispering Shrine", "Obsidian Halls", 82, 94, 16, 12),
             ("south_hall", "Silent Gallery", "Frostglass Wing", 65, 80, 20, 13),
             ("south_vault", "Sunken Vault", "Glacier Archive", 103, 78, 21, 14),
@@ -76,7 +75,6 @@ class DungeonMap:
             ("east_archive", "The Drowned Archive", "Glacier Archive", 109, 44, 24, 15),
             ("east_hall", "Ashen Gallery", "Blue-Ice Reliquary", 121, 68, 20, 15),
             ("boss", "The Eclipse Throne", "Eclipse Keep", 125, 91, 20, 14)
-
         ]
 
         self.grid = [
@@ -90,18 +88,13 @@ class DungeonMap:
 
         self.floor_tiles = []
         self.doors = []
-
         self._load_tiles()
         self._carve_rooms()
         self._connect_rooms()
         self._create_doors()
         self.surface = self._build_surface()
-
         self.walkable_positions = [
-            (
-                x * TILE_SIZE + TILE_SIZE // 2,
-                y * TILE_SIZE + TILE_SIZE // 2
-            )
+            (x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2)
             for y in range(GRID_HEIGHT)
             for x in range(GRID_WIDTH)
             if self.grid[y][x]
@@ -124,22 +117,17 @@ class DungeonMap:
     def _load_tiles(self):
 
         tile_folder = os.path.join(IMAGE_FOLDER, "Tiles")
-
-
         for number in range(1, 6):
             tile_path = os.path.join(tile_folder, f"Road{number}.png")
             sheet = pg.image.load(tile_path).convert_alpha()
             source_tile = sheet.subsurface((32, 32, 16, 16)).copy()
             tile = pg.transform.scale(source_tile, (TILE_SIZE, TILE_SIZE))
-
             ice_tint = pg.Surface(tile.get_size(), pg.SRCALPHA)
             ice_tint.fill((145, 165, 190, 115))
             tile.blit(ice_tint, (0, 0))
-
             darken = pg.Surface(tile.get_size(), pg.SRCALPHA)
             darken.fill((8, 13, 24, 75))
             tile.blit(darken, (0, 0))
-
             self.floor_tiles.append(tile)
 
     #
@@ -149,14 +137,12 @@ class DungeonMap:
         for room in self.rooms:
             if room[0] == room_id:
                 return room
-
         return None
 
     #
 
     @staticmethod
     def _room_centre(room):
-
         _, _, _, x, y, width, height = room
         return x + width // 2, y + height // 2
 
@@ -190,24 +176,12 @@ class DungeonMap:
         def carve_horizontal(a, b, y):
             left = min(a, b)
             right = max(a, b)
-            self._carve_rect(
-                left,
-                y - half_width,
-                right - left + 1,
-                corridor_width,
-                region
-            )
+            self._carve_rect(left, y - half_width, right - left + 1, corridor_width, region)
 
         def carve_vertical(x, a, b):
             top = min(a, b)
             bottom = max(a, b)
-            self._carve_rect(
-                x - half_width,
-                top,
-                corridor_width,
-                bottom - top + 1,
-                region
-            )
+            self._carve_rect(x - half_width, top, corridor_width, bottom - top + 1, region)
 
         if horizontal_first:
             carve_horizontal(x1, x2, y1)
@@ -241,18 +215,11 @@ class DungeonMap:
         for room_a_id, room_b_id, horizontal_first in links:
             room_a = self._room_by_id(room_a_id)
             room_b = self._room_by_id(room_b_id)
-
-            self._carve_corridor(
-                self._room_centre(room_a),
-                self._room_centre(room_b),
-                room_a[2],
-                horizontal_first
-            )
+            self._carve_corridor(self._room_centre(room_a), self._room_centre(room_b), room_a[2], horizontal_first)
 
     #
 
     def _create_doors(self):
-
 
         door_tiles = [
             (90, 92), (81, 86), (105, 80), (87, 68), (110, 86),
@@ -261,11 +228,7 @@ class DungeonMap:
         ]
 
         for tile_x, tile_y in door_tiles:
-            self.doors.append({
-                "x": tile_x,
-                "y": tile_y,
-                "open": True
-            })
+            self.doors.append({"x": tile_x, "y": tile_y, "open": True})
 
     #
 
@@ -273,68 +236,29 @@ class DungeonMap:
 
         surface = pg.Surface((MAP_WIDTH, MAP_HEIGHT))
         surface.fill((10, 13, 21))
-
-
         for tile_y in range(GRID_HEIGHT):
             for tile_x in range(GRID_WIDTH):
                 if not self.grid[tile_y][tile_x]:
                     continue
-
                 region = self.region_grid[tile_y][tile_x]
                 region_data = self.REGIONS[region]
                 tile_index = region_data["tileset"]
-                rect = pg.Rect(
-                    tile_x * TILE_SIZE,
-                    tile_y * TILE_SIZE,
-                    TILE_SIZE,
-                    TILE_SIZE
-                )
-
+                rect = pg.Rect(tile_x * TILE_SIZE, tile_y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                 pg.draw.rect(surface, region_data["colour"], rect)
                 surface.blit(self.floor_tiles[tile_index], rect.topleft)
-
-
-                pg.draw.line(
-                    surface,
-                    (27, 34, 47),
-                    rect.bottomleft,
-                    rect.bottomright,
-                    1
-                )
-
-
+                pg.draw.line(surface, (27, 34, 47), rect.bottomleft, rect.bottomright, 1)
         for tile_y in range(GRID_HEIGHT):
             for tile_x in range(GRID_WIDTH):
                 if self.grid[tile_y][tile_x]:
                     continue
-
-                touches_floor = any(
-                    0 <= tile_x + dx < GRID_WIDTH and
-                    0 <= tile_y + dy < GRID_HEIGHT and
-                    self.grid[tile_y + dy][tile_x + dx]
-                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))
-                )
-
+                touches_floor = any(0 <= tile_x + dx < GRID_WIDTH and 0 <= tile_y + dy < GRID_HEIGHT and self.grid[tile_y + dy][tile_x + dx] for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
                 if not touches_floor:
                     continue
-
-                rect = pg.Rect(
-                    tile_x * TILE_SIZE,
-                    tile_y * TILE_SIZE,
-                    TILE_SIZE,
-                    TILE_SIZE
-                )
+                rect = pg.Rect(tile_x * TILE_SIZE, tile_y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                 wall_tile = self.floor_tiles[(tile_x + tile_y) % 5]
                 surface.blit(wall_tile, rect.topleft)
                 pg.draw.rect(surface, (20, 25, 36), rect, 2)
-                pg.draw.line(
-                    surface,
-                    (10, 13, 20),
-                    rect.bottomleft,
-                    rect.bottomright,
-                    3
-                )
-
+                pg.draw.line(surface, (10, 13, 20), rect.bottomleft, rect.bottomright, 3)
         return surface.convert()
 
     #
@@ -343,44 +267,25 @@ class DungeonMap:
 
         tile_x = int(x // TILE_SIZE)
         tile_y = int(y // TILE_SIZE)
-
         if not (0 <= tile_x < GRID_WIDTH and 0 <= tile_y < GRID_HEIGHT):
             return False
-
         if not self.grid[tile_y][tile_x]:
             return False
-
         for door in self.doors:
             if door["open"]:
                 continue
-
-            door_rect = pg.Rect(
-                door["x"] * TILE_SIZE,
-                door["y"] * TILE_SIZE,
-                TILE_SIZE,
-                TILE_SIZE
-            )
-
+            door_rect = pg.Rect(door["x"] * TILE_SIZE, door["y"] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             if door_rect.collidepoint(x, y):
                 return False
-
         return True
 
     #
 
     def can_move_circle(self, x, y, radius):
 
-        check_points = (
-            (x - radius, y),
-            (x + radius, y),
-            (x, y - radius),
-            (x, y + radius)
-        )
-
-        return all(
-            self.is_walkable(point_x, point_y)
-            for point_x, point_y in check_points
-        )
+        check_points = ((x - radius, y), (x + radius, y), (x, y - radius), (x, y + radius))
+        return all(self.is_walkable(point_x, point_y) 
+        for point_x, point_y in check_points)
 
     #
 
@@ -388,18 +293,11 @@ class DungeonMap:
 
         for _ in range(100):
             position = random.choice(self.walkable_positions)
-
             if player_x is None or player_y is None:
                 return position
-
-            distance = math.hypot(
-                position[0] - player_x,
-                position[1] - player_y
-            )
-
+            distance = math.hypot(position[0] - player_x, position[1] - player_y)
             if distance > 900:
                 return position
-
         return random.choice(self.walkable_positions)
 
     #
@@ -408,32 +306,24 @@ class DungeonMap:
 
         nearest = None
         nearest_distance = 96
-
         for door in self.doors:
             door_x = door["x"] * TILE_SIZE + TILE_SIZE // 2
             door_y = door["y"] * TILE_SIZE + TILE_SIZE // 2
             distance = math.hypot(door_x - x, door_y - y)
-
             if distance < nearest_distance:
                 nearest = door
                 nearest_distance = distance
-
         return nearest
 
     #
 
     def interact(self, x, y):
-
         door = self.nearest_door(x, y)
-
         if door is None:
             return "There is no door nearby."
-
         door["open"] = not door["open"]
-
         if door["open"]:
             return "Door opened."
-
         return "Door closed."
 
     #
@@ -441,32 +331,17 @@ class DungeonMap:
     def render(self, screen, camera):
 
         screen.blit(self.surface, camera.apply(0, 0))
-
         for door in self.doors:
             screen_x = round(door["x"] * TILE_SIZE - camera.offset.x)
             screen_y = round(door["y"] * TILE_SIZE - camera.offset.y)
             rect = pg.Rect(screen_x, screen_y, TILE_SIZE, TILE_SIZE)
-
             if door["open"]:
-
                 pg.draw.rect(screen, (92, 115, 139), rect, 3)
             else:
-
                 pg.draw.rect(screen, (35, 47, 64), rect)
                 pg.draw.rect(screen, (129, 157, 187), rect, 3)
-                pg.draw.line(
-                    screen,
-                    (185, 218, 244),
-                    (rect.centerx, rect.top + 3),
-                    (rect.centerx, rect.bottom - 3),
-                    2
-                )
-                pg.draw.circle(
-                    screen,
-                    (205, 229, 250),
-                    (rect.right - 7, rect.centery),
-                    3
-                )
+                pg.draw.line(screen, (185, 218, 244), (rect.centerx, rect.top + 3), (rect.centerx, rect.bottom - 3), 2)
+                pg.draw.circle(screen, (205, 229, 250), (rect.right - 7, rect.centery), 3)
 
 
 # ============================================================
@@ -494,18 +369,15 @@ class Player(pg.sprite.Sprite):
         self.attack_delay = 0.3
         self.max_lives = 7
         self.current_lives = self.max_lives
-
         self.facing = "down"
         self.moving = False
         self.animation_time = 0
         self.attack_animation_time = 0
-
         # Block
         self.block_duration = 0.28
         self.block_cooldown_length = 1.5
         self.block_time = 0
         self.block_cooldown = 0
-
         # Dash
         self.dash_duration = 0.5
         self.dash_cooldown_length = 2.0
@@ -513,14 +385,7 @@ class Player(pg.sprite.Sprite):
         self.dash_time = 0
         self.dash_cooldown = 0
         self.dash_direction = pg.Vector2(0, 0)
-
-        self.animations = {
-            "Idle": load_player_animation("Samurai", "Idle"),
-            "Run": load_player_animation("Samurai", "Run"),
-            "Attack": load_player_animation("Samurai", "Attack_1"),
-            "Shield": load_player_animation("Samurai", "Shield")
-        }
-
+        self.animations = {"Idle": load_player_animation("Samurai", "Idle"), "Run": load_player_animation("Samurai", "Run"), "Attack": load_player_animation("Samurai", "Attack_1"), "Shield": load_player_animation("Samurai", "Shield")}
         self.white_shield_frames = [
             self._make_white(frame)
             for frame in self.animations["Shield"]
@@ -532,10 +397,7 @@ class Player(pg.sprite.Sprite):
     def _make_white(frame):
 
         white_frame = frame.copy()
-        white_frame.fill(
-            (255, 255, 255),
-            special_flags=pg.BLEND_RGB_ADD
-        )
+        white_frame.fill((255, 255, 255), special_flags=pg.BLEND_RGB_ADD)
         return white_frame
 
     #
@@ -556,7 +418,6 @@ class Player(pg.sprite.Sprite):
 
         if self.block_cooldown > 0 or self.blocking:
             return False
-
         self.block_time = self.block_duration
         self.block_cooldown = self.block_cooldown_length
         self.animation_time = 0
@@ -568,15 +429,9 @@ class Player(pg.sprite.Sprite):
 
         if self.dash_cooldown > 0 or self.dashing:
             return False
-
         keys = pg.key.get_pressed()
-        dx = int(keys[pg.K_d] or keys[pg.K_RIGHT]) - int(
-            keys[pg.K_a] or keys[pg.K_LEFT]
-        )
-        dy = int(keys[pg.K_s] or keys[pg.K_DOWN]) - int(
-            keys[pg.K_w] or keys[pg.K_UP]
-        )
-
+        dx = int(keys[pg.K_d] or keys[pg.K_RIGHT]) - int(keys[pg.K_a] or keys[pg.K_LEFT])
+        dy = int(keys[pg.K_s] or keys[pg.K_DOWN]) - int(keys[pg.K_w] or keys[pg.K_UP])
         if dx or dy:
             self.dash_direction = pg.Vector2(dx, dy).normalize()
             if abs(dx) >= abs(dy):
@@ -584,14 +439,8 @@ class Player(pg.sprite.Sprite):
             else:
                 self.facing = "down" if dy > 0 else "up"
         else:
-            directions = {
-                "up": pg.Vector2(0, -1),
-                "down": pg.Vector2(0, 1),
-                "left": pg.Vector2(-1, 0),
-                "right": pg.Vector2(1, 0)
-            }
+            directions = {"up": pg.Vector2(0, -1), "down": pg.Vector2(0, 1), "left": pg.Vector2(-1, 0), "right": pg.Vector2(1, 0)}
             self.dash_direction = directions[self.facing]
-
         self.dash_time = self.dash_duration
         self.dash_cooldown = self.dash_cooldown_length
         return True
@@ -601,30 +450,21 @@ class Player(pg.sprite.Sprite):
     def keybinds(self, dt, dungeon_map):
 
         keys = pg.key.get_pressed()
-        dx = int(keys[pg.K_d] or keys[pg.K_RIGHT]) - int(
-            keys[pg.K_a] or keys[pg.K_LEFT]
-        )
-        dy = int(keys[pg.K_s] or keys[pg.K_DOWN]) - int(
-            keys[pg.K_w] or keys[pg.K_UP]
-        )
-
+        dx = int(keys[pg.K_d] or keys[pg.K_RIGHT]) - int(keys[pg.K_a] or keys[pg.K_LEFT])
+        dy = int(keys[pg.K_s] or keys[pg.K_DOWN]) - int(keys[pg.K_w] or keys[pg.K_UP])
         self.moving = bool(dx or dy)
-
         if self.moving:
             direction = pg.Vector2(dx, dy).normalize()
-
             if abs(dx) >= abs(dy):
                 self.facing = "right" if dx > 0 else "left"
             else:
                 self.facing = "down" if dy > 0 else "up"
-
         if self.dashing:
             move_x = self.dash_direction.x * self.dash_speed * dt
             move_y = self.dash_direction.y * self.dash_speed * dt
             self._move(move_x, move_y, dungeon_map)
             self.dash_time = max(0, self.dash_time - dt)
             self.moving = True
-
         elif self.moving:
             direction = pg.Vector2(dx, dy).normalize()
             move_x = direction.x * self.speed * dt
@@ -635,20 +475,11 @@ class Player(pg.sprite.Sprite):
 
     def _move(self, move_x, move_y, dungeon_map):
 
-        if dungeon_map.can_move_circle(
-            self.x + move_x,
-            self.y,
-            self.size
-        ):
+        if dungeon_map.can_move_circle(self.x + move_x, self.y, self.size):
             self.x += move_x
         elif self.dashing:
             self.dash_time = 0
-
-        if dungeon_map.can_move_circle(
-            self.x,
-            self.y + move_y,
-            self.size
-        ):
+        if dungeon_map.can_move_circle(self.x, self.y + move_y, self.size):
             self.y += move_y
         elif move_y and self.dashing:
             self.dash_time = 0
@@ -661,41 +492,23 @@ class Player(pg.sprite.Sprite):
             frames = self.white_shield_frames
             elapsed = self.block_duration - self.block_time
             frame = frames[min(len(frames) - 1, int(elapsed / 0.09))]
-
         elif self.attack_animation_time > 0:
             frames = self.animations["Attack"]
             frame = frames[
-                min(
-                    len(frames) - 1,
-                    int((0.3 - self.attack_animation_time) / 0.05)
-                )
+                (min(len(frames) - 1), (int((0.3 - self.attack_animation_time) / 0.05)))
             ]
-
         elif self.moving:
             frames = self.animations["Run"]
             frame = frames[int(self.animation_time * 12) % len(frames)]
-
         else:
             frames = self.animations["Idle"]
             frame = frames[int(self.animation_time * 5) % len(frames)]
-
         if self.facing == "left":
             frame = pg.transform.flip(frame, True, False)
-
         screen_x, screen_y = camera.apply(self.x, self.y)
-        self.screen.blit(
-            frame,
-            frame.get_rect(midbottom=(screen_x, screen_y + 28))
-        )
-
+        self.screen.blit(frame, frame.get_rect(midbottom=(screen_x, screen_y + 28)))
         if self.blocking:
-            pg.draw.circle(
-                self.screen,
-                (205, 230, 255),
-                (screen_x, screen_y),
-                48,
-                3
-            )
+            pg.draw.circle(self.screen, (205, 230, 255), (screen_x, screen_y), 48, 3)
 
     #
 
@@ -713,18 +526,13 @@ class Player(pg.sprite.Sprite):
 
         damage_multiplier = self.max_hp / (self.max_hp + self.defence)
         actual_damage = max(1, round(incoming_damage * damage_multiplier))
-
         if self.blocking:
             actual_damage = max(1, round(actual_damage * 0.2))
-
         self.current_hp = max(0, self.current_hp - actual_damage)
-
         if self.current_hp == 0:
             self.current_lives = max(0, self.current_lives - 1)
-
             if self.current_lives > 0:
                 self.current_hp = self.max_hp
-
         return actual_damage
 
     #
@@ -733,10 +541,8 @@ class Player(pg.sprite.Sprite):
 
         if self.attack_cooldown > 0:
             return
-
         for enemy in enemies:
             distance = math.hypot(enemy.x - self.x, enemy.y - self.y)
-
             if distance <= self.attack_range + enemy.size:
                 enemy.take_damage(self.attack)
                 self.attack_cooldown = self.attack_delay
@@ -749,10 +555,7 @@ class Player(pg.sprite.Sprite):
 
         self.animation_time += dt
         self.attack_cooldown = max(0, self.attack_cooldown - dt)
-        self.attack_animation_time = max(
-            0,
-            self.attack_animation_time - dt
-        )
+        self.attack_animation_time = max(0, self.attack_animation_time - dt)
         self.block_time = max(0, self.block_time - dt)
         self.block_cooldown = max(0, self.block_cooldown - dt)
         self.dash_cooldown = max(0, self.dash_cooldown - dt)
