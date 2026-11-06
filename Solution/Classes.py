@@ -441,7 +441,7 @@ class Enemy:
         self.x, self.y = self.random_spawn_position()
         self.set_stats()
         self.attack_cooldown = 0
-        self.attack_delay = 1.0
+        self.attack_delay = 2.0
         self.projectiles = []
         self.animation_time = random.random()
         self.attack_animation_time = 0
@@ -457,7 +457,7 @@ class Enemy:
         if self.enemy_type == "Common":
             self.max_hp = random.randint(25, 50)
             self.attack = random.randint(5, 10)
-            self.speed = random.randint(360, 460)
+            self.speed = random.randint(125, 300)
             self.size = 24
             self.slime_number = 1
             self.sprite_scale = 128
@@ -467,7 +467,7 @@ class Enemy:
         elif self.enemy_type == "Strong":
             self.max_hp = random.randint(50, 80)
             self.attack = random.randint(10, 15)
-            self.speed = random.randint(280, 380)
+            self.speed = random.randint(100, 275)
             self.size = 32
             self.slime_number = 2
             self.sprite_scale = 144
@@ -477,7 +477,7 @@ class Enemy:
         elif self.enemy_type == "Elite":
             self.max_hp = random.randint(150, 200)
             self.attack = random.randint(20, 30)
-            self.speed = random.randint(200, 280)
+            self.speed = random.randint(75, 250)
             self.size = 46
             self.slime_number = 3
             self.sprite_scale = 160
@@ -487,7 +487,7 @@ class Enemy:
         else:
             self.max_hp = self.player.max_hp * 5
             self.attack = self.player.attack * 2
-            self.speed = random.randint(140, 200)
+            self.speed = random.randint(50, 200)
             self.size = 64
             self.slime_number = 3
             self.sprite_scale = 224
