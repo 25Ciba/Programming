@@ -9,6 +9,7 @@ screen = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("Melody of the Mist")
 clock = pg.time.Clock()
 running = True
+show_map = False
 font = pg.font.Font(None, 28)
 small_font = pg.font.Font(None, 22)
 
@@ -17,8 +18,18 @@ game_map = Map()
 player = Player(screen)
 enemy_manager = EnemyManager(screen, player, game_map)
 camera = Camera(screen, MAP_WIDTH, MAP_HEIGHT)
-message = "WASD / arrow keys: move | left click: attack | right click: block | space: dash"
+message = "WASD / arrow keys: move | left click: attack | right click: block | space: dash | M: map"
 message_timer = 6.0
+
+# Make the mist once. The clear part follows the player.
+vision = player.pvisionRadius()
+fog_radius = vision + 150
+mist = pg.Surface((fog_radius * 2, fog_radius * 2), pg.SRCALPHA)
+mist.fill((11, 14, 24, 240))
+for radius in range(fog_radius, vision - 1, -1):
+    fade = (radius - vision) / (fog_radius - vision)
+    pg.draw.circle(mist, (11, 14, 24, int(240 * fade)), (fog_radius, fog_radius), radius)
+fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
 
 # Main game loop
 while running:
@@ -30,11 +41,13 @@ while running:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
                 running = False
-            elif event.key == pg.K_SPACE:
+            elif event.key == pg.K_m:
+                show_map = not show_map
+            elif event.key == pg.K_SPACE and not show_map:
                 if player.begin_dash():
                     message = "Dash!"
                     message_timer = 0.6
-        elif event.type == pg.MOUSEBUTTONDOWN:
+        elif event.type == pg.MOUSEBUTTONDOWN and not show_map:
             if event.button == 1:
                 player.attack_enemies(enemy_manager.enemies)
             elif event.button == 3:
@@ -43,10 +56,11 @@ while running:
                     message_timer = 0.6
 
     # Update the game objects
-    player.update(dt)
-    player.keybinds(dt, game_map)
-    enemy_manager.update(dt)
-    camera.update(player)
+    if not show_map:
+        player.update(dt)
+        player.keybinds(dt, game_map)
+        enemy_manager.update(dt)
+        camera.update(player)
 
     if player.current_lives <= 0:
         running = False
@@ -60,10 +74,10 @@ while running:
     player.render(camera)
 
     # Draw fog of war
-    fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
-    fog_surface.fill((0, 0, 0, 205))
+    fog_surface.fill((11, 14, 24, 240))
     player_screen_pos = camera.apply(player.x, player.y)
-    pg.draw.circle(fog_surface, (0, 0, 0, 0), player_screen_pos, player.pvisionRadius())
+    mist_rect = mist.get_rect(center=player_screen_pos)
+    fog_surface.blit(mist, mist_rect, special_flags=pg.BLEND_RGBA_MIN)
     screen.blit(fog_surface, (0, 0))
 
     # Draw health and ability information
@@ -96,6 +110,14 @@ while running:
         message_box = message_text.get_rect(midbottom=(WIDTH // 2, HEIGHT - 18)).inflate(24, 14)
         pg.draw.rect(screen, (20, 24, 34), message_box)
         screen.blit(message_text, message_text.get_rect(center=message_box.center))
+
+    location = small_font.render(game_map.location_name(player.x, player.y), True, (238, 242, 247))
+    location_box = location.get_rect(topright=(WIDTH - 24, 24))
+    pg.draw.rect(screen, (20, 24, 34), location_box.inflate(20, 12))
+    screen.blit(location, location_box)
+
+    if show_map:
+        game_map.render_overview(screen, player, small_font)
 
     # Show the finished frame
     pg.display.flip()

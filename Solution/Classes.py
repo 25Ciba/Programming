@@ -1,16 +1,20 @@
 import pygame as pg
 import random
 import math
+from pathlib import Path
+from DungeonLayout import REGIONS, ROOMS, CORRIDORS, GATES, BOSS_ROOMS, START_X, START_Y
 
 ###
 
-MAP_WIDTH = 4800
-MAP_HEIGHT = 3520
+IMAGE_FOLDER = Path(__file__).resolve().parent / "Images"
+
+MAP_WIDTH = 23040
+MAP_HEIGHT = 23040
 
 ###
 
 def load_player_animation(character, action, scale=128):
-    path = f"Solution/Images/Characters/{character}/{action}.png"
+    path = IMAGE_FOLDER / f"Characters/{character}/{action}.png"
     sheet = pg.image.load(path).convert_alpha()
 
     if character == "Rogue":
@@ -30,7 +34,7 @@ def load_player_animation(character, action, scale=128):
 
 def load_enemy_animation(slime_number, action, scale=128):
 
-    path = f"Solution/Images/Enemy/Slime{slime_number}/With_shadow/Slime{slime_number}_{action}_with_shadow.png"
+    path = IMAGE_FOLDER / f"Enemy/Slime{slime_number}/With_shadow/Slime{slime_number}_{action}_with_shadow.png"
     sheet = pg.image.load(path).convert_alpha()
     frame_size = 64
     frames_by_direction = []
@@ -51,37 +55,70 @@ class Map:
 
     def __init__(self):
 
-        self.areas = [
-            (1800, 1300, 1200, 900, (48, 55, 67)),
-            (1200, 1550, 600, 300, (54, 68, 84)),
-            (500, 1200, 700, 1000, (57, 72, 91)),
-            (3000, 1550, 500, 300, (54, 68, 84)),
-            (3500, 1200, 800, 1000, (48, 65, 79)),
-            (2250, 650, 300, 650, (54, 68, 84)),
-            (1700, 150, 1400, 500, (57, 72, 91)),
-            (2250, 2200, 300, 550, (54, 68, 84)),
-            (1750, 2750, 1300, 600, (43, 49, 65))
+        self.rooms = []
+        self.room_floors = []
+        self.corridors = []
+        for name, region, x, y, width, height in ROOMS:
+            rect = pg.Rect(x, y, width, height)
+            self.rooms.append((name, region, rect))
+            shape = (len(self.rooms) + region) % 4
+            for floor in self.room_shape(rect, shape):
+                self.room_floors.append((name, region, floor))
+        for region, x, y, width, height in CORRIDORS:
+            self.corridors.append((region, pg.Rect(x, y, width, height)))
+
+    #
+
+    def room_shape(self, rect, shape):
+
+        x, y, width, height = rect
+        inset_x = width // 6
+        inset_y = height // 6
+        if shape == 0:
+            # Stepped oval.
+            return [
+                pg.Rect(x + inset_x * 2, y, width - inset_x * 4, height),
+                pg.Rect(x + inset_x, y + inset_y // 2, width - inset_x * 2, height - inset_y),
+                pg.Rect(x, y + inset_y * 2, width, height - inset_y * 4)
+            ]
+        if shape == 1:
+            # Wide middle with clipped corners.
+            return [
+                pg.Rect(x + inset_x, y, width - inset_x * 2, height),
+                pg.Rect(x, y + inset_y, width, height - inset_y * 2)
+            ]
+        if shape == 2:
+            # Offset chambers, with a notch in opposite corners.
+            return [
+                pg.Rect(x, y, width - inset_x, height - inset_y),
+                pg.Rect(x + inset_x, y + inset_y, width - inset_x, height - inset_y)
+            ]
+        # Broad lower chamber with a narrow upper end.
+        return [
+            pg.Rect(x + inset_x, y, width - inset_x * 2, height),
+            pg.Rect(x, y + inset_y * 2, width, height - inset_y * 3)
         ]
-
-        self.surface = pg.Surface((MAP_WIDTH, MAP_HEIGHT))
-        self.surface.fill((10, 13, 21))
-
-        for area in self.areas:
-            x, y, width, height, colour = area
-            area_rect = pg.Rect(x, y, width, height)
-            pg.draw.rect(self.surface, colour, area_rect)
-            pg.draw.rect(self.surface, (25, 32, 45), area_rect, 5)
 
     #
 
     def is_walkable(self, x, y):
 
-        for area in self.areas:
-            area_x, area_y, width, height, colour = area
-            area_rect = pg.Rect(area_x, area_y, width, height)
-            if area_rect.collidepoint(x, y):
+        for name, region, rect in self.room_floors:
+            if rect.collidepoint(x, y):
+                return True
+        for region, rect in self.corridors:
+            if rect.collidepoint(x, y):
                 return True
         return False
+
+    #
+
+    def location_name(self, x, y):
+
+        for name, region, rect in self.room_floors:
+            if rect.collidepoint(x, y):
+                return f"{REGIONS[region][0]}  /  {name}"
+        return "Connecting passage"
 
     #
 
@@ -98,21 +135,83 @@ class Map:
     def random_enemy_spawn_position(self, player_x=None, player_y=None):
 
         for attempt in range(100):
-            area = random.choice(self.areas)
-            area_x, area_y, width, height, colour = area
-            x = random.randint(area_x + 50, area_x + width - 50)
-            y = random.randint(area_y + 50, area_y + height - 50)
+            name, region, rect = random.choice(self.rooms)
+            x = random.randint(rect.left + 50, rect.right - 50)
+            y = random.randint(rect.top + 50, rect.bottom - 50)
+            if not self.can_move_circle(x, y, 40):
+                continue
             if player_x is None or player_y is None:
                 return x, y
             distance = math.hypot(x - player_x, y - player_y)
             if distance > 900:
                 return x, y
-        return x, y
+        return rect.center
 
     #
 
     def render(self, screen, camera):
-        screen.blit(self.surface, camera.apply(0, 0))
+        view = screen.get_rect()
+        for region, rect in self.corridors:
+            wall_rect = pg.Rect(camera.apply(rect.x, rect.y), rect.size).inflate(24, 24)
+            if view.colliderect(wall_rect):
+                pg.draw.rect(screen, (26, 29, 42), wall_rect)
+        for name, region, rect in self.room_floors:
+            wall_rect = pg.Rect(camera.apply(rect.x, rect.y), rect.size).inflate(24, 24)
+            if view.colliderect(wall_rect):
+                pg.draw.rect(screen, (26, 29, 42), wall_rect)
+        for region, rect in self.corridors:
+            visible_rect = pg.Rect(camera.apply(rect.x, rect.y), rect.size)
+            if view.colliderect(visible_rect):
+                colour = (48, 52, 65)
+                if region >= 0:
+                    red, green, blue = REGIONS[region][1]
+                    colour = (red * 3 // 4, green * 3 // 4, blue * 3 // 4)
+                pg.draw.rect(screen, colour, visible_rect)
+        for name, region, rect in self.room_floors:
+            visible_rect = pg.Rect(camera.apply(rect.x, rect.y), rect.size)
+            if view.colliderect(visible_rect):
+                pg.draw.rect(screen, REGIONS[region][1], visible_rect)
+        for first_region, second_region, x, y in GATES:
+            gate_x, gate_y = camera.apply(x, y)
+            pg.draw.rect(screen, (197, 168, 105), (gate_x - 6, gate_y - 6, 12, 12))
+
+    #
+
+    def render_overview(self, screen, player, font):
+
+        panel = pg.Rect(0, 0, 780, 650)
+        panel.center = screen.get_rect().center
+        pg.draw.rect(screen, (15, 19, 30), panel)
+        map_x = panel.x + 16
+        map_y = panel.y + 42
+        scale = MAP_WIDTH / 600
+        title = font.render("Dungeon layout   |   M to close", True, (238, 242, 247))
+        screen.blit(title, (map_x, panel.y + 12))
+        for region, rect in self.corridors:
+            pg.draw.rect(screen, (64, 69, 85), (map_x + rect.x // scale, map_y + rect.y // scale, rect.width // scale, rect.height // scale))
+        for name, region, rect in self.room_floors:
+            pg.draw.rect(screen, REGIONS[region][1], (map_x + rect.x // scale, map_y + rect.y // scale, rect.width // scale, rect.height // scale))
+        for name, region, rect in self.rooms:
+            if name in BOSS_ROOMS:
+                x = map_x + rect.centerx // scale
+                y = map_y + rect.centery // scale
+                colour = (183, 225, 193)
+                if name != BOSS_ROOMS[0]:
+                    colour = (240, 166, 169)
+                pg.draw.polygon(screen, colour, [(x, y - 6), (x + 6, y), (x, y + 6), (x - 6, y)])
+        for first_region, second_region, x, y in GATES:
+            pg.draw.circle(screen, (197, 168, 105), (map_x + x // scale, map_y + y // scale), 3)
+        pg.draw.circle(screen, (250, 250, 250), (map_x + int(player.x) // scale, map_y + int(player.y) // scale), 5)
+        for region in range(len(REGIONS)):
+            name, colour = REGIONS[region]
+            legend_y = map_y + region * 25
+            pg.draw.rect(screen, colour, (panel.right - 160, legend_y + 4, 10, 10))
+            screen.blit(font.render(name, True, (238, 242, 247)), (panel.right - 143, legend_y))
+        for label, colour in [("Planned gate", (197, 168, 105)), ("First boss arena", (183, 225, 193)), ("Ultra Boss arena", (240, 166, 169))]:
+            legend_y += 25
+            pg.draw.rect(screen, colour, (panel.right - 160, legend_y + 4, 10, 10))
+            screen.blit(font.render(label, True, (238, 242, 247)), (panel.right - 143, legend_y))
+
 
 #================================================
 
@@ -124,8 +223,8 @@ class Player(pg.sprite.Sprite):
         super().__init__()
 
         self.screen = screen
-        self.x = MAP_WIDTH / 2
-        self.y = MAP_HEIGHT / 2
+        self.x = START_X
+        self.y = START_Y
         self.speed = 600
         self.size = 30
         self.visionRadius = 300
@@ -690,3 +789,4 @@ class Background:
 
     def render(self, screen, camera):
         screen.blit(self.image, camera.apply(self.rect.x, self.rect.y))
+

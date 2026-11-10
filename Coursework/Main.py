@@ -12,6 +12,8 @@ from DungeonLayout import STARTX, STARTY
 from Hud import GOLD, Drawstatus, Drawminimap, Drawoverview, Drawaimring
 from Classes import Player, EnemyManager, Camera, Map, MAPWIDTH, MAPHEIGHT
 
+###
+
 # Start Pygame
 pg.display.init()
 pg.font.init()
@@ -27,6 +29,9 @@ scale = min(Displayframe.width / WIDTH, Displayframe.height / HEIGHT)
 Displayframe.size = (round(WIDTH * scale), round(HEIGHT * scale))
 Displayframe.center = display.get_rect().center
 pg.display.set_caption("Melody of the Mist")
+
+###
+
 def Playrun(display, screen, Displayframe, profile, saved=None):
 
     fullscreen = False
@@ -37,6 +42,9 @@ def Playrun(display, screen, Displayframe, profile, saved=None):
     Bossprompt = None
     font = pg.font.Font(None, 28)
     Smallfont = pg.font.Font(None, 22)
+    
+    ###
+
     # Create the game objects
     Gamemap = Map()
     player = Player(screen)
@@ -70,7 +78,9 @@ def Playrun(display, screen, Displayframe, profile, saved=None):
     message = "Progress loaded." if saved else ("Traveller's Passage. Follow the path north to leave." if profile.get("tutorial", True) else f"Lantern Shelter. You attuned to {player.fragment}.")
     Messagetimer = 6.0
 
-    # Make the mist once. The clear part follows the player.
+    ###
+
+    # Make the fog of war surface
     vision = player.pvisionRadius()
     Fogradius = vision + 150
     mist = pg.Surface((Fogradius * 2, Fogradius * 2), pg.SRCALPHA)
@@ -80,6 +90,8 @@ def Playrun(display, screen, Displayframe, profile, saved=None):
         pg.draw.circle(mist, (11, 14, 24, int(240 * fade)), (Fogradius, Fogradius), radius)
     Fogsurface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
 
+    ###
+
     def Pickposition(Mouseposition, frame, camera):
 
         if not frame.collidepoint(Mouseposition):
@@ -88,6 +100,7 @@ def Playrun(display, screen, Displayframe, profile, saved=None):
         y = round((Mouseposition[1] - frame.y) * HEIGHT / frame.height)
         return x, y, round(x + camera.offset.x), round(y + camera.offset.y)
 
+    ###
 
     def Collectdefeats():
 
@@ -113,6 +126,8 @@ def Playrun(display, screen, Displayframe, profile, saved=None):
             Bossdrops.append(BossDrop(screen, enemy.x, enemy.y, item))
             Rewardedbosses.add(enemy.name)
             stats.Areascleared = len(Rewardedbosses)
+
+###
 
     # Main game loop
     while running:
