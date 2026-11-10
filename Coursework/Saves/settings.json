@@ -1,0 +1,25 @@
+{
+  "keys": {
+    "Move up": 119,
+    "Move down": 115,
+    "Move left": 97,
+    "Move right": 100,
+    "Dash": 32,
+    "Attack": -1,
+    "Defend": -3,
+    "Heal": 104,
+    "Interact": 101,
+    "Inventory": 105,
+    "Market": 107,
+    "Map": 109,
+    "Skill 1": 49,
+    "Skill 2": 50,
+    "Skill 3": 51,
+    "Skill 4": 52
+  },
+  "volumes": {
+    "Music": 100,
+    "Sound effects": 100,
+    "Ambient": 100
+  }
+}
