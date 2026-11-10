@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 
 CLASSES = ("Mage", "Tank", "Fighter", "Assassin", "Summoner", "Marksman")
-REGION_GEAR = [
+REGIONGEAR = [
     ("Ivory", (151, 190, 218), ("Key Rubbing", "Thaw Ledger", "Snow Court Map", "Metronome Spring", "Pianist's Program")),
     ("Copper", (209, 130, 83), ("Workshop Receipt", "Ember Seal", "Tunnel Sketch", "Luthier's Letter", "Broken Fret")),
     ("Reed", (162, 203, 170), ("Vestry Key Tag", "Chime Diagram", "Breath Exercise", "Chapel Ribbon", "Flutist's Margin")),
@@ -19,18 +19,18 @@ LORE = [
     ("Pump Room. The western keeper wrote the tide down by ear.", "Dark Reservoir. Stay on the dry stones between the pools.", "Raised Causeway. Follow the green lights north of the reservoir.", "Sunken Hall. The eastern shelves held the missing harp strings.", "Harp Chamber. The Tidehook marks the door beyond the pools."),
     ("Tuning Room. A string snapped here every night.", "Lantern Court. The brass inlay leads back to the main aisle.", "East Backstage. Read the stage cue before following the footlights.", "West Backstage. Spare bows still hang off the main passage.", "Performance Hall. The final bow waits past the southern doors.")
 ]
-GEAR_FORMS = {
+GEARFORMS = {
     "Armour": ("Vestment", "Cuirass", "Mail", "Mantle", "Coat"),
     "Weapons": ("Focus", "Maul", "Blade", "Knife", "Bow"),
     "Shields": ("Ward", "Tower", "Kite", "Buckler", "Heater"),
     "Talismans": ("Lens", "Seal", "Knot", "Charm", "Pendant")
 }
 ITEMS = {}
-LOOT_SETS = []
-for region, (prefix, colour, notes) in enumerate(REGION_GEAR):
+LOOTSETS = []
+for region, (prefix, colour, notes) in enumerate(REGIONGEAR):
     for tier, note in enumerate(notes):
         loot = []
-        for category, forms in GEAR_FORMS.items():
+        for category, forms in GEARFORMS.items():
             form = forms[tier]
             name = f"{prefix} {form}"
             affinity = CLASSES[tier if tier < 4 else 5]
@@ -45,7 +45,7 @@ for region, (prefix, colour, notes) in enumerate(REGION_GEAR):
             loot.append((name, 1))
         ITEMS[note] = ("Misc", "Note", colour, 0, "", LORE[region][tier])
         loot.append((note, 1))
-        LOOT_SETS.append(loot)
+        LOOTSETS.append(loot)
 
 POTIONS = [
     ("Crimson Flask", 25, (200, 70, 92)),
@@ -58,15 +58,15 @@ POTIONS = [
 ]
 for name, healing, colour in POTIONS:
     ITEMS[name] = ("Potions", "Flask", colour, healing, "", f"Restores up to {healing} HP.")
-for index, loot in enumerate(LOOT_SETS):
+for index, loot in enumerate(LOOTSETS):
     if index % 3 == 0:
         loot.append((POTIONS[(index // 3) % len(POTIONS)][0], 2))
 
-START_WEAPON = "Ivory Blade"
-START_SHIELD = "Ivory Buckler"
+STARTWEAPON = "Ivory Blade"
+STARTSHIELD = "Ivory Buckler"
 
 
-def best_heal(inventory, missing):
+def Bestheal(inventory, missing):
     available = [(name, value) for name, value, _ in POTIONS if inventory.get(name, 0) > 0]
     if not available:
         return None
@@ -74,16 +74,16 @@ def best_heal(inventory, missing):
 
 
 def drink(player, inventory, name=None):
-    missing = player.max_hp - player.current_hp
+    missing = player.Maxhp - player.Currenthp
     if missing <= 0:
         return "HP is already full."
-    if player.current_hp <= 0 or player.attack_stage or player.dash_time or player.block_time:
+    if player.Currenthp <= 0 or player.Attackstage or player.Dashtime or player.Blocktime:
         return "Wait for your current action to finish."
-    name = name or best_heal(inventory, missing)
+    name = name or Bestheal(inventory, missing)
     if not name or not inventory.get(name, 0):
         return "No healing potions left."
     gain = min(missing, ITEMS[name][3])
-    player.current_hp += gain
+    player.Currenthp += gain
     inventory[name] -= 1
     if inventory[name] == 0:
         del inventory[name]
@@ -92,23 +92,23 @@ def drink(player, inventory, name=None):
 
 def equip(player, name):
     category, form, colour, power, affinity, lore = ITEMS[name]
-    if player.attack_stage or player.dash_time or player.block_time:
+    if player.Attackstage or player.Dashtime or player.Blocktime:
         return "Wait for your current action to finish."
     if category == "Weapons":
-        player.main_hand = name
+        player.Mainhand = name
         player.attack = power + (4 if player.clan == "Fighter" else 0)
-        player.attack_range = {"Knife": 78, "Blade": 100, "Maul": 90, "Bow": 370, "Focus": 300}[form]
+        player.Attackrange = {"Knife": 78, "Blade": 100, "Maul": 90, "Bow": 370, "Focus": 300}[form]
         if player.clan == "Marksman" and form in ("Bow", "Focus"):
-            player.attack_range += 70
-        player.art.equip_weapon(name)
+            player.Attackrange += 70
+        player.art.Equipweapon(name)
     elif category == "Shields":
-        player.off_hand = name
-        player.guard_multiplier = max(.12, .24 - power * .008)
+        player.Offhand = name
+        player.Guardmultiplier = max(.12, .24 - power * .008)
         if player.clan == "Tank":
-            player.guard_multiplier *= .75
+            player.Guardmultiplier *= .75
     elif category == "Armour":
         player.armour = name
-        player.defence = getattr(player, 'base_defence', 50) + power
+        player.defence = getattr(player, 'Basedefence', 50) + power
     elif category == "Talismans":
         player.charm = name
     else:
@@ -120,11 +120,11 @@ ART = Path(__file__).resolve().parent / "Images" / "Items"
 
 
 @lru_cache(maxsize=200)
-def equipment_art(name):
+def Equipmentart(name):
 
     category, form, colour, _, _, _ = ITEMS[name]
     if form in ("Blade", "Knife"):
-        region = next(index for index, (prefix, _, _) in enumerate(REGION_GEAR) if name.startswith(prefix + " "))
+        region = next(index for index, (prefix, _, _) in enumerate(REGIONGEAR) if name.startswith(prefix + " "))
         sprite = pg.image.load(ART / f"{form}{region}.png").convert_alpha()
     else:
         sprite = pg.image.load(ART / f"{form}.png").convert_alpha()
@@ -132,18 +132,21 @@ def equipment_art(name):
     return sprite
 
 
-def draw_hand(surface, hand, direction, name, scale=1):
+def Drawhand(surface, hand, direction, name, scale=1):
 
     if not name:
         return
     category, form, _, _, _, _ = ITEMS[name]
-    sprite = equipment_art(name)
+    sprite = Equipmentart(name)
     direction = pg.Vector2(direction).normalize()
     length = {"Knife": 18, "Blade": 28, "Maul": 27, "Bow": 24, "Focus": 27}.get(form, 21 if form == "Buckler" else 28)
     size = max(3, round(length * scale))
     sprite = pg.transform.scale_by(sprite, size / max(sprite.get_size()))
     angle = direction.as_polar()[1]
-    source = 90 if category == "Shields" else -48
+    if category == "Shields":
+        source = 90
+    else:
+        source = -48
     sprite = pg.transform.rotate(sprite, source - angle)
     grip = pg.Vector2(hand)
     if category == "Weapons" and form != "Bow":
@@ -152,27 +155,27 @@ def draw_hand(surface, hand, direction, name, scale=1):
 
 
 @lru_cache(maxsize=200)
-def item_icon(name):
+def Itemicon(name):
 
     if name not in ITEMS:
-        return fragment_icon(name)
+        return Fragmenticon(name)
     category, _, colour, _, _, _ = ITEMS[name]
-    sprite = equipment_art(name)
-    icon = pg.Surface((44,44),pg.SRCALPHA)
+    sprite = Equipmentart(name)
+    icon = pg.Surface((44, 44), pg.SRCALPHA)
     sprite = pg.transform.smoothscale_by(sprite, 38 / max(sprite.get_size()))
-    icon.blit(sprite,sprite.get_rect(center=(22,22)))
+    icon.blit(sprite, sprite.get_rect(center=(22, 22)))
     if category == "Misc":
-        notes = next(names for _, _, names in REGION_GEAR if name in names)
+        notes = next(names for _, _, names in REGIONGEAR if name in names)
         mark = notes.index(name)
-        pg.draw.rect(icon,(74,43,53),(29,29,8,7))
+        pg.draw.rect(icon, (74, 43, 53), (29, 29, 8, 7))
         for index in range(mark+1):
             x = 29 + index % 3 * 2
             y = 30 + index // 3 * 2
-            pg.draw.rect(icon,colour,(x,y,2,2))
+            pg.draw.rect(icon, colour, (x, y, 2, 2))
     return icon
 
 
-def fragment_icon(name):
+def Fragmenticon(name):
 
     icon = pg.Surface((34, 34), pg.SRCALPHA)
     outline = (55, 35, 55)

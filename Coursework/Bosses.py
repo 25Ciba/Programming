@@ -1,12 +1,12 @@
 import math
 import pygame as pg
 from Classes import Enemy, Projectile
-from BossMotion import boss_pose_offset, draw_frost_fold
-from Frost import ARENA_X, ARENA_Y
-from Guitar import GUITAR_ARENA_X, GUITAR_ARENA_Y
-from Flute import FLUTE_ARENA_X, FLUTE_ARENA_Y
-from Cello import CELLO_ARENA_X, CELLO_ARENA_Y
-from Harp import HARP_ARENA_X, HARP_ARENA_Y
+from BossMotion import Bossposeoffset, Drawfrostfold
+from Frost import ARENAX, ARENAY
+from Guitar import GUITARARENAX, GUITARARENAY
+from Flute import FLUTEARENAX, FLUTEARENAY
+from Cello import CELLOARENAX, CELLOARENAY
+from Harp import HARPARENAX, HARPARENAY
 
 
 # Piano Ultra Boss
@@ -32,70 +32,70 @@ class PianoNote(Projectile):
 
 class PianoBoss(Enemy):
 
-    arena_room = "Piano Chamber"
-    region_folder = "FrostPiano"
+    Arenaroom = "Piano Chamber"
+    Regionfolder = "FrostPiano"
     instrument = "Piano"
-    home_position = (ARENA_X, ARENA_Y)
+    Homeposition = (ARENAX, ARENAY)
 
-    def __init__(self, screen, player, game_map):
+    def __init__(self, screen, player, Gamemap):
 
-        super().__init__(screen, self.instrument, player, game_map, f"{self.instrument} Ultra Boss", self.home_position)
+        super().__init__(screen, self.instrument, player, Gamemap, f"{self.instrument} Ultra Boss", self.Homeposition)
         self.pattern = 0
         self.chord = []
         self.lanes = []
         self.volley = []
-        self.beat_timer = 0
+        self.Beattimer = 0
         self.engaged = False
         self.recovery = 0
         self.echoes = []
         self.wave = None
-        self.wave_y = 0
-        self.wave_gap = ARENA_X
-        self.wave_hit = False
+        self.Wavey = 0
+        self.Wavegap = ARENAX
+        self.Wavehit = False
         self.encore = 0
-        self.second_phase = False
-        self.teleport_time = 0
-        self.teleport_index = 0
-        self.teleport_origin = self.home_position
-        self.teleport_target = self.home_position
+        self.Secondphase = False
+        self.Teleporttime = 0
+        self.Teleportindex = 0
+        self.Teleportorigin = self.Homeposition
+        self.Teleporttarget = self.Homeposition
 
-    def set_stats(self):
+    def Setstats(self):
 
-        self.max_hp = 1100
-        self.current_hp = self.max_hp
+        self.Maxhp = 1100
+        self.Currenthp = self.Maxhp
         self.attack = 47
         self.size = 82
 
     def update(self, dt):
 
-        self.animation_time += dt
-        if self.current_hp <= 0:
-            self.death_time += dt
+        self.Animationtime += dt
+        if self.Currenthp <= 0:
+            self.Deathtime += dt
             return
-        if not self.game_map.location_name(self.player.x, self.player.y).endswith(self.arena_room):
+        if not self.Gamemap.Locationname(self.player.x, self.player.y).endswith(self.Arenaroom):
             self.engaged = False
             self.windup = 0
-            self.attack_animation_time = 0
+            self.Attackanimationtime = 0
             self.projectiles.clear()
             self.volley.clear()
             self.echoes.clear()
             self.wave = None
             self.encore = 0
-            self.teleport_time = 0
+            self.Teleporttime = 0
             self.recovery = 0
             return
         if not self.engaged:
             self.engaged = True
             self.recovery = 0.8
-        if self.instrument in ("Piano", "Flute", "Harp", "Violin") and self.update_teleport(dt):
+        if self.instrument in ("Piano", "Flute", "Harp", "Violin") and self.Updateteleport(dt):
             return
-        self.update_projectiles(dt)
-        self.update_floor_attacks(dt)
-        if self.current_hp <= self.max_hp / 2 and not self.second_phase:
-            self.second_phase = True
+        self.Updateprojectiles(dt)
+        self.Updatefloorattacks(dt)
+        if self.Currenthp <= self.Maxhp / 2 and not self.Secondphase:
+            self.Secondphase = True
             self.encore = 1.1
             self.windup = 0
-            self.attack_animation_time = 0
+            self.Attackanimationtime = 0
             self.echoes.clear()
             self.volley.clear()
             self.projectiles.clear()
@@ -106,83 +106,83 @@ class PianoBoss(Enemy):
         if self.windup > 0:
             self.windup = max(0, self.windup - dt)
             if self.windup == 0:
-                self.release_attack()
+                self.Releaseattack()
             return
-        self.attack_animation_time = max(0, self.attack_animation_time - dt)
+        self.Attackanimationtime = max(0, self.Attackanimationtime - dt)
         if self.volley:
-            self.beat_timer -= dt
-            if self.beat_timer <= 0:
+            self.Beattimer -= dt
+            if self.Beattimer <= 0:
                 angle = self.volley.pop(0)
-                shot = self.make_note(self.aim.rotate(angle))
+                shot = self.Makenote(self.aim.rotate(angle))
                 self.projectiles.append(shot)
-                self.beat_timer += 0.105
+                self.Beattimer += 0.105
         self.recovery = max(0, self.recovery - dt)
         if self.recovery == 0 and not self.echoes and self.wave is None:
-            self.start_phrase()
+            self.Startphrase()
 
-    def teleport_anchor(self):
+    def Teleportanchor(self):
 
         anchors = [
-            (ARENA_X - 570, ARENA_Y - 240), (ARENA_X + 570, ARENA_Y - 240),
-            (ARENA_X - 570, ARENA_Y + 250), (ARENA_X + 570, ARENA_Y + 250),
-            (ARENA_X, ARENA_Y + 320)
+            (ARENAX - 570, ARENAY - 240), (ARENAX + 570, ARENAY - 240),
+            (ARENAX - 570, ARENAY + 250), (ARENAX + 570, ARENAY + 250),
+            (ARENAX, ARENAY + 320)
         ]
         for step in range(len(anchors)):
-            x, y = anchors[(step + self.teleport_index * 2) % len(anchors)]
+            x, y = anchors[(step + self.Teleportindex * 2) % len(anchors)]
             if math.hypot(x - self.x, y - self.y) < 180:
                 continue
             if math.hypot(x - self.player.x, y - self.player.y) < 145:
                 continue
-            if self.can_step(x, y):
+            if self.Canstep(x, y):
                 return x, y
         return None
 
-    def update_teleport(self, dt):
+    def Updateteleport(self, dt):
 
         thresholds = (0.75, 0.50, 0.25)
-        if self.teleport_time == 0:
-            if self.teleport_index == len(thresholds) or self.current_hp > self.max_hp * thresholds[self.teleport_index]:
+        if self.Teleporttime == 0:
+            if self.Teleportindex == len(thresholds) or self.Currenthp > self.Maxhp * thresholds[self.Teleportindex]:
                 return False
-            target = self.teleport_anchor()
+            target = self.Teleportanchor()
             if target is None:
                 return False
-            self.teleport_time = 1.0
-            self.teleport_origin = (self.x, self.y)
-            self.teleport_target = target
+            self.Teleporttime = 1.0
+            self.Teleportorigin = (self.x, self.y)
+            self.Teleporttarget = target
             self.windup = 0
-            self.attack_animation_time = 0
+            self.Attackanimationtime = 0
             self.echoes.clear()
             self.volley.clear()
             self.projectiles.clear()
             self.wave = None
-        previous = self.teleport_time
-        self.teleport_time = max(0, self.teleport_time - dt)
-        if previous > 0.50 >= self.teleport_time:
-            x, y = self.teleport_target
-            if not self.can_step(x, y) or self.body_overlap(self.player.x, self.player.y, self.player.size, x, y) > 0:
-                target = self.teleport_anchor()
+        previous = self.Teleporttime
+        self.Teleporttime = max(0, self.Teleporttime - dt)
+        if previous > 0.50 >= self.Teleporttime:
+            x, y = self.Teleporttarget
+            if not self.Canstep(x, y) or self.Bodyoverlap(self.player.x, self.player.y, self.player.size, x, y) > 0:
+                target = self.Teleportanchor()
                 if target is None:
-                    self.teleport_time = 0
+                    self.Teleporttime = 0
                     return True
-                self.teleport_target = target
-            self.x, self.y = self.teleport_target
-            self.teleport_index += 1
-        if self.teleport_time == 0:
+                self.Teleporttarget = target
+            self.x, self.y = self.Teleporttarget
+            self.Teleportindex += 1
+        if self.Teleporttime == 0:
             self.recovery = 0.85
         return True
 
-    def make_note(self, direction):
+    def Makenote(self, direction):
 
         return PianoNote(self.screen, self.x, self.y, direction, self.attack)
 
-    def start_phrase(self):
+    def Startphrase(self):
 
         self.pattern = self.strikes % 5
-        self.move_name = ["Frozen Chord", "Black-Key Sweep", "Rising Arpeggio", "Echo Notes", "Glissando"][self.pattern]
-        self.windup_length = [0.92, 0.86, 0.98, 0.76, 1.05][self.pattern]
-        if self.current_hp <= self.max_hp / 2:
-            self.windup_length *= 0.82
-        self.windup = self.windup_length
+        self.Movename = ["Frozen Chord", "Black-Key Sweep", "Rising Arpeggio", "Echo Notes", "Glissando"][self.pattern]
+        self.Winduplength = [0.92, 0.86, 0.98, 0.76, 1.05][self.pattern]
+        if self.Currenthp <= self.Maxhp / 2:
+            self.Winduplength *= 0.82
+        self.windup = self.Winduplength
         target = pg.Vector2(self.player.x, self.player.y)
         offset = target - pg.Vector2(self.x, self.y)
         if offset.length_squared():
@@ -190,37 +190,40 @@ class PianoBoss(Enemy):
         side = self.aim.rotate(90)
         self.chord = [target + side * shift for shift in (-126, 0, 126)]
         # Alternate lanes, leaving a wide gap between each pair.
-        center = round((target.x - ARENA_X) / 160) * 160 + ARENA_X
-        self.lanes = [pg.Rect(center + step * 320 - 49, ARENA_Y - 520, 110, 1040) for step in (-2, -1, 0, 1, 2)]
+        center = round((target.x - ARENAX) / 160) * 160 + ARENAX
+        self.lanes = [pg.Rect(center + step * 320 - 49, ARENAY - 520, 110, 1040) for step in (-2, -1, 0, 1, 2)]
         if self.pattern == 3:
             self.chord = [target + side * shift for shift in (-145, 0, 145)]
         if self.pattern == 4:
-            shift = 165 if target.x <= ARENA_X else -165
-            self.wave_gap = max(ARENA_X - 545, min(ARENA_X + 545, target.x + shift))
-            self.wave_y = ARENA_Y - 390
+            shift = 165 if target.x <= ARENAX else -165
+            self.Wavegap = max(ARENAX - 545, min(ARENAX + 545, target.x + shift))
+            self.Wavey = ARENAY - 390
 
-    def release_attack(self):
+    def Releaseattack(self):
 
-        self.attack_animation_time = 0.3
+        self.Attackanimationtime = 0.3
         self.strikes += 1
-        self.recovery = 1.25 if self.current_hp > self.max_hp / 2 else 1.0
+        if self.Currenthp > self.Maxhp / 2:
+            self.recovery = 1.25
+        else:
+            self.recovery = 1.0
         if self.pattern == 0:
             if any(point.distance_to((self.player.x, self.player.y)) <= 110 + self.player.size for point in self.chord):
-                self.player.take_damage(self.attack)
+                self.player.Takedamage(self.attack)
         elif self.pattern == 1:
             if any(lane.inflate(self.player.size * 2, self.player.size * 2).collidepoint(self.player.x, self.player.y) for lane in self.lanes):
-                self.player.take_damage(self.attack + 7)
+                self.player.Takedamage(self.attack + 7)
         elif self.pattern == 2:
             self.volley = [-30, -15, 0, 15, 30]
-            self.beat_timer = 0
+            self.Beattimer = 0
             self.recovery += 0.42
         elif self.pattern == 3:
             self.echoes = [(point, 0.28 + index * 0.29) for index, point in enumerate(self.chord)]
         else:
-            self.wave = self.wave_y
-            self.wave_hit = False
+            self.wave = self.Wavey
+            self.Wavehit = False
 
-    def update_floor_attacks(self, dt):
+    def Updatefloorattacks(self, dt):
 
         active = []
         for point, remaining in self.echoes:
@@ -229,30 +232,30 @@ class PianoBoss(Enemy):
                 active.append((point, remaining))
             else:
                 if point.distance_to((self.player.x, self.player.y)) <= 68 + self.player.size:
-                    self.player.take_damage(self.attack - 9)
+                    self.player.Takedamage(self.attack - 9)
         self.echoes = active
         if self.wave is not None:
-            speed = 650 if self.second_phase else 540
+            speed = 650 if self.Secondphase else 540
             self.wave += speed * dt
-            in_width = abs(self.player.x - ARENA_X) <= 720
-            in_gap = abs(self.player.x - self.wave_gap) <= 95 - self.player.size
-            if in_width and not in_gap and not self.wave_hit and abs(self.player.y - self.wave) <= self.player.size + 15:
-                self.player.take_damage(self.attack + 3)
-                self.wave_hit = True
-            if self.wave >= ARENA_Y + 425:
+            Inwidth = abs(self.player.x - ARENAX) <= 720
+            Ingap = abs(self.player.x - self.Wavegap) <= 95 - self.player.size
+            if Inwidth and not Ingap and not self.Wavehit and abs(self.player.y - self.wave) <= self.player.size + 15:
+                self.player.Takedamage(self.attack + 3)
+                self.Wavehit = True
+            if self.wave >= ARENAY + 425:
                 self.wave = None
 
     def render(self, camera):
 
-        if self.current_hp > 0:
-            if self.teleport_time > 0:
-                self.render_teleport(camera)
+        if self.Currenthp > 0:
+            if self.Teleporttime > 0:
+                self.Renderteleport(camera)
             for point, remaining in self.echoes:
                 x, y = camera.apply(point.x, point.y)
                 pg.draw.circle(self.screen, (114, 169, 226), (x, y), 68, 2)
                 pg.draw.circle(self.screen, (207, 241, 249), (x, y), max(4, round(remaining * 55)), 3)
             if self.wave is not None:
-                self.draw_wave(camera, self.wave, (162, 229, 248))
+                self.Drawwave(camera, self.wave, (162, 229, 248))
             if self.encore > 0:
                 x, y = camera.apply(self.x, self.y)
                 radius = round(90 + (1.1 - self.encore) * 90)
@@ -260,14 +263,14 @@ class PianoBoss(Enemy):
                 pg.draw.circle(self.screen, (74, 135, 187), (x, y), radius + 12, 2)
         super().render(camera)
 
-    def render_teleport(self, camera):
+    def Renderteleport(self, camera):
 
-        draw_frost_fold(self.screen, camera, self.teleport_origin, 1 - self.teleport_time, False)
-        draw_frost_fold(self.screen, camera, self.teleport_target, 1 - abs(2 * self.teleport_time - 1), True)
+        Drawfrostfold(self.screen, camera, self.Teleportorigin, 1 - self.Teleporttime, False)
+        Drawfrostfold(self.screen, camera, self.Teleporttarget, 1 - abs(2 * self.Teleporttime - 1), True)
 
-    def draw_wave(self, camera, y, color):
+    def Drawwave(self, camera, y, color):
 
-        for left, right in [(ARENA_X - 720, self.wave_gap - 95), (self.wave_gap + 95, ARENA_X + 720)]:
+        for left, right in [(ARENAX - 720, self.Wavegap - 95), (self.Wavegap + 95, ARENAX + 720)]:
             x, py = camera.apply(left, y)
             width = round(right - left)
             pg.draw.rect(self.screen, (57, 101, 153), (x, py - 10, width, 21))
@@ -275,51 +278,54 @@ class PianoBoss(Enemy):
             for offset in range(0, width - 14, 22):
                 pg.draw.rect(self.screen, color, (x + offset, py - 5, 12, 10))
 
-    def keeper_frame(self):
+    def Keeperframe(self):
 
         index = 0
-        if self.teleport_time > 0:
-            frame = self.keeper_poses[5 if self.teleport_time > 0.5 else 7].copy()
-            frame.set_alpha(round(255 * abs(self.teleport_time - 0.5) * 2))
+        if self.Teleporttime > 0:
+            frame = self.Keeperposes[5 if self.Teleporttime > 0.5 else 7].copy()
+            frame.set_alpha(round(255 * abs(self.Teleporttime - 0.5) * 2))
             return frame
         if self.encore > 0:
             index = 1
         elif self.windup > 0:
             index = (1, 3, 5, 5, 3)[self.pattern]
-        elif self.attack_animation_time > 0.10 or self.volley:
+        elif self.Attackanimationtime > 0.10 or self.volley:
             index = (2, 4, 6, 6, 4)[self.pattern]
         if index == 0:
-            return self.boss_rest_frame()
-        frame = self.keeper_poses[index]
+            return self.Bossrestframe()
+        frame = self.Keeperposes[index]
         if self.aim.x < 0:
             return pg.transform.flip(frame, True, False)
         return frame
 
-    def draw_warning(self, x, y):
+    def Drawwarning(self, x, y):
 
-        color = (104, 200, 225) if self.windup else (204, 249, 250)
-        offset_x = x - self.x
-        offset_y = y - self.y
+        if self.windup:
+            color = (104, 200, 225)
+        else:
+            color = (204, 249, 250)
+        Offsetx = x - self.x
+        Offsety = y - self.y
         if self.pattern == 0:
             for point in self.chord:
-                center = (round(point.x + offset_x), round(point.y + offset_y))
+                center = (round(point.x + Offsetx), round(point.y + Offsety))
                 pg.draw.circle(self.screen, color, center, 110, 3 if self.windup else 8)
                 pg.draw.circle(self.screen, color, center, 7, 2)
         elif self.pattern == 1:
             for lane in self.lanes:
-                rect = lane.move(round(offset_x), round(offset_y))
-                for y_line in range(rect.top, rect.bottom, 34):
-                    pg.draw.line(self.screen, color, (rect.left, y_line), (rect.left, y_line + 18), 3)
-                    pg.draw.line(self.screen, color, (rect.right, y_line), (rect.right, y_line + 18), 3)
+                rect = lane.move(round(Offsetx), round(Offsety))
+                for Yline in range(rect.top, rect.bottom, 34):
+                    pg.draw.line(self.screen, color, (rect.left, Yline), (rect.left, Yline + 18), 3)
+                    pg.draw.line(self.screen, color, (rect.right, Yline), (rect.right, Yline + 18), 3)
         elif self.pattern == 3:
             for point in self.chord:
-                center = (round(point.x + offset_x), round(point.y + offset_y))
+                center = (round(point.x + Offsetx), round(point.y + Offsety))
                 pg.draw.circle(self.screen, (114, 169, 226), center, 68, 2)
         elif self.pattern == 4:
             if self.windup:
-                top = round(self.wave_y + offset_y)
-                for gap in (self.wave_gap - 95, self.wave_gap + 95):
-                    edge = round(gap + offset_x)
+                top = round(self.Wavey + Offsety)
+                for gap in (self.Wavegap - 95, self.Wavegap + 95):
+                    edge = round(gap + Offsetx)
                     for dy in range(0, 790, 48):
                         pg.draw.line(self.screen, (130, 223, 220), (edge, top + dy), (edge, top + dy + 16), 3)
         else:
@@ -332,15 +338,15 @@ class PianoBoss(Enemy):
 
 class GuitarBoss(PianoBoss):
 
-    arena_room = "Resonance Arena"
-    region_folder = "GuitarCaverns"
+    Arenaroom = "Resonance Arena"
+    Regionfolder = "GuitarCaverns"
     instrument = "Guitar"
-    home_position = (GUITAR_ARENA_X, GUITAR_ARENA_Y)
+    Homeposition = (GUITARARENAX, GUITARARENAY)
 
-    def set_stats(self):
+    def Setstats(self):
 
-        self.max_hp = 1250
-        self.current_hp = self.max_hp
+        self.Maxhp = 1250
+        self.Currenthp = self.Maxhp
         self.attack = 48
         self.speed = 145
         self.size = 82
@@ -353,38 +359,41 @@ class GuitarBoss(PianoBoss):
 
         self.moving = False
         super().update(dt)
-        if not self.engaged and self.current_hp > 0:
-            self.x, self.y = self.home_position
+        if not self.engaged and self.Currenthp > 0:
+            self.x, self.y = self.Homeposition
             return
-        if self.current_hp > 0 and self.recovery > 0 and not self.windup and not self.encore and self.wave is None and self.attack_animation_time <= 0:
-            self.move_towards(self.player.x, self.player.y, dt, 148)
+        if self.Currenthp > 0 and self.recovery > 0 and not self.windup and not self.encore and self.wave is None and self.Attackanimationtime <= 0:
+            self.Movetowards(self.player.x, self.player.y, dt, 148)
 
-    def start_phrase(self):
+    def Startphrase(self):
 
         self.pattern = self.strikes % 5
-        self.move_name = ["Pick Rush", "Hammer-On", "Palm Mute", "Pickup Pull", "Fret Slide"][self.pattern]
-        self.windup_length = [0.69, 0.62, 0.92, 0.84, 0.94][self.pattern]
-        if self.second_phase:
-            self.windup_length *= 0.82
-        self.windup = self.windup_length
-        self.wave_hit = False
-        self.aim_at_player()
+        self.Movename = ["Pick Rush", "Hammer-On", "Palm Mute", "Pickup Pull", "Fret Slide"][self.pattern]
+        self.Winduplength = [0.69, 0.62, 0.92, 0.84, 0.94][self.pattern]
+        if self.Secondphase:
+            self.Winduplength *= 0.82
+        self.windup = self.Winduplength
+        self.Wavehit = False
+        self.Aimatplayer()
 
-    def aim_at_player(self):
+    def Aimatplayer(self):
 
         aim = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
         if aim.length_squared():
             self.aim = aim.normalize()
 
-    def release_attack(self):
+    def Releaseattack(self):
 
-        self.attack_animation_time = 0.3
+        self.Attackanimationtime = 0.3
         self.strikes += 1
-        self.recovery = 1.25 if not self.second_phase else 1.02
+        if not self.Secondphase:
+            self.recovery = 1.25
+        else:
+            self.recovery = 1.02
         if self.pattern == 0:
             self.wave = 0.40
         elif self.pattern == 1:
-            self.hit_front(155, 60, self.attack - 10)
+            self.Hitfront(155, 60, self.attack - 10)
             self.wave = 0.28
         elif self.pattern == 2:
             # Wait out the guard for a longer opening.
@@ -394,91 +403,91 @@ class GuitarBoss(PianoBoss):
         else:
             self.wave = -60
 
-    def take_damage(self, damage):
+    def Takedamage(self, damage):
 
-        if self.current_hp > 0 and self.pattern == 2 and self.windup > 0:
+        if self.Currenthp > 0 and self.pattern == 2 and self.windup > 0:
             self.windup = 0
             self.strikes += 1
-            self.aim_at_player()
+            self.Aimatplayer()
             self.wave = 0.26
             self.recovery = 1.35
-            self.attack_animation_time = 0.3
+            self.Attackanimationtime = 0.3
             return False
-        return super().take_damage(damage)
+        return super().Takedamage(damage)
 
-    def hit_front(self, reach, half_width, damage):
+    def Hitfront(self, reach, Halfwidth, damage):
 
         offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
-        if 0 <= offset.dot(self.aim) <= reach and abs(offset.cross(self.aim)) <= half_width and self.can_reach_player():
-            self.player.take_damage(damage)
+        if 0 <= offset.dot(self.aim) <= reach and abs(offset.cross(self.aim)) <= Halfwidth and self.Canreachplayer():
+            self.player.Takedamage(damage)
             return True
         return False
 
-    def update_floor_attacks(self, dt):
+    def Updatefloorattacks(self, dt):
 
         if self.wave is None:
             return
         if self.pattern == 4:
-            self.update_fret_slide(dt)
+            self.Updatefretslide(dt)
             return
 
-        step_time = min(dt, self.wave)
-        self.wave -= step_time
+        Steptime = min(dt, self.wave)
+        self.wave -= Steptime
         if self.pattern == 0:
-            self.rush(step_time)
+            self.rush(Steptime)
         elif self.pattern == 3:
-            self.pull_rogue(step_time)
+            self.Pullrogue(Steptime)
 
         if self.wave == 0:
             self.wave = None
             if self.pattern == 1:
-                self.hit_front(210, 82, self.attack)
-                self.attack_animation_time = 0.3
+                self.Hitfront(210, 82, self.attack)
+                self.Attackanimationtime = 0.3
             elif self.pattern == 2:
-                self.hit_front(180, 65, self.attack + 9)
-                self.attack_animation_time = 0.3
+                self.Hitfront(180, 65, self.attack + 9)
+                self.Attackanimationtime = 0.3
             elif self.pattern == 3:
-                self.hit_front(155, 65, self.attack)
-                self.attack_animation_time = 0.3
+                self.Hitfront(155, 65, self.attack)
+                self.Attackanimationtime = 0.3
 
     def rush(self, dt):
 
-        move = self.aim * (795 if self.second_phase else 680) * dt
+        move = self.aim * (795 if self.Secondphase else 680) * dt
         steps = max(1, math.ceil(move.length() / 8))
         for step in range(steps):
-            if not self.wave_hit and self.hit_front(105, 57, self.attack + 2):
-                self.wave_hit = True
+            if not self.Wavehit and self.Hitfront(105, 57, self.attack + 2):
+                self.Wavehit = True
             x, y = self.x + move.x / steps, self.y + move.y / steps
-            if not self.can_step(x, y) or not self.game_map.location_name(x, y).endswith(self.arena_room):
+            if not self.Canstep(x, y) or not self.Gamemap.Locationname(x, y).endswith(self.Arenaroom):
                 self.wave = 0
                 break
             self.x, self.y = x, y
 
-    def pull_rogue(self, dt):
+    def Pullrogue(self, dt):
 
         offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
         if offset.length() > 450 or offset.dot(self.aim) < 0 or abs(offset.cross(self.aim)) > 95:
             return
-        if self.player.dash_time > 0 or not self.can_reach_player():
+        if self.player.Dashtime > 0 or not self.Canreachplayer():
             return
         pull = self.aim * (-270 * dt)
-        self.player._move(pull.x, pull.y, self.game_map)
+        self.player._move(pull.x, pull.y, self.Gamemap)
 
-    def update_fret_slide(self, dt):
+    def Updatefretslide(self, dt):
 
         previous = self.wave
-        self.wave = min(60, self.wave + (180 if self.second_phase else 145) * dt)
+        self.wave = min(60, self.wave + (180 if self.Secondphase else 145) * dt)
         offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
-        if not self.wave_hit and 0 < offset.length() <= 450 + self.player.size:
+        if not self.Wavehit and 0 < offset.length() <= 450 + self.player.size:
             angle = (self.aim.angle_to(offset) + 180) % 360 - 180
             margin = math.degrees(math.asin(min(1, (self.player.size + 7) / offset.length())))
             if previous - margin <= angle <= self.wave + margin:
-                self.player.take_damage(self.attack + 4)
-                self.wave_hit = True
+                self.player.Takedamage(self.attack + 4)
+                self.Wavehit = True
         if self.wave >= 60:
             self.wave = None
 
-    def draw_wave(self, camera, value, color):
+    def Drawwave(self, camera, value, color):
 
         x, y = camera.apply(self.x, self.y)
         origin = pg.Vector2(x, y)
@@ -497,9 +506,12 @@ class GuitarBoss(PianoBoss):
             pg.draw.line(self.screen, (255, 164, 71), origin, tip, 8)
             pg.draw.line(self.screen, (255, 233, 174), origin, tip, 3)
 
-    def draw_warning(self, x, y):
+    def Drawwarning(self, x, y):
 
-        color = (227, 134, 67) if self.windup else (255, 213, 137)
+        if self.windup:
+            color = (227, 134, 67)
+        else:
+            color = (255, 213, 137)
         origin = pg.Vector2(x, y)
         side = self.aim.rotate(90)
         if self.pattern == 0 and self.windup:
@@ -543,9 +555,9 @@ class WindOrb(Projectile):
         self.direction = self.direction.rotate(self.curve * dt)
         super().update(dt)
 
-    def is_on_screen(self):
+    def Isonscreen(self):
 
-        return self.life > 0 and super().is_on_screen()
+        return self.life > 0 and super().Isonscreen()
 
     def render(self, camera):
 
@@ -557,15 +569,15 @@ class WindOrb(Projectile):
 
 class FluteBoss(PianoBoss):
 
-    arena_room = "Flute Hall"
-    region_folder = "FluteCloister"
+    Arenaroom = "Flute Hall"
+    Regionfolder = "FluteCloister"
     instrument = "Flute"
-    home_position = (FLUTE_ARENA_X, FLUTE_ARENA_Y)
+    Homeposition = (FLUTEARENAX, FLUTEARENAY)
 
-    def set_stats(self):
+    def Setstats(self):
 
-        self.max_hp = 1350
-        self.current_hp = self.max_hp
+        self.Maxhp = 1350
+        self.Currenthp = self.Maxhp
         self.attack = 48
         self.size = 82
 
@@ -573,66 +585,72 @@ class FluteBoss(PianoBoss):
 
         return 37, 22, 8
 
-    def teleport_anchor(self):
+    def Teleportanchor(self):
 
         for side in (1, -1):
             for offset in (-330, 310, 0):
-                x = FLUTE_ARENA_X + 490 * side
-                y = FLUTE_ARENA_Y + offset
-                if math.hypot(x - self.x, y - self.y) > 220 and math.hypot(x - self.player.x, y - self.player.y) > 145 and self.can_step(x, y):
+                x = FLUTEARENAX + 490 * side
+                y = FLUTEARENAY + offset
+                if math.hypot(x - self.x, y - self.y) > 220 and math.hypot(x - self.player.x, y - self.player.y) > 145 and self.Canstep(x, y):
                     return x, y
         return None
 
-    def render_teleport(self, camera):
+    def Renderteleport(self, camera):
 
-        for index, point in enumerate((self.teleport_origin, self.teleport_target)):
+        for index, point in enumerate((self.Teleportorigin, self.Teleporttarget)):
             x, y = camera.apply(*point)
-            spin = (1 - self.teleport_time) * 350 + index * 90
+            spin = (1 - self.Teleporttime) * 350 + index * 90
             for i in range(16):
                 shift = pg.Vector2(23 + i * 4, 0).rotate(spin + i * 26)
                 px, py = round(x + shift.x), round(y + shift.y * 0.5 - i * 3)
                 pg.draw.line(self.screen, (165, 215, 197), (px - 9, py + 2), (px + 8, py), 2)
 
-    def start_phrase(self):
+    def Startphrase(self):
 
         self.pattern = self.strikes % 5
-        self.move_name = ["Long Breath", "Spiral Current", "Breathing Space", "Crossdraft", "Reed Wisps"][self.pattern]
-        self.windup_length = [0.82, 0.76, 1.12, 0.85, 0.91][self.pattern]
-        if self.second_phase:
-            self.windup_length *= 0.85
-        self.windup = self.windup_length
+        self.Movename = ["Long Breath", "Spiral Current", "Breathing Space", "Crossdraft", "Reed Wisps"][self.pattern]
+        self.Winduplength = [0.82, 0.76, 1.12, 0.85, 0.91][self.pattern]
+        if self.Secondphase:
+            self.Winduplength *= 0.85
+        self.windup = self.Winduplength
         direction = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
         if direction.length_squared():
             self.aim = direction.normalize()
-        side = -1 if self.player.x > FLUTE_ARENA_X else 1
-        self.wave_gap = (FLUTE_ARENA_X + side * 265, FLUTE_ARENA_Y + 170)
-        self.wave_hit = False
+        if self.player.x > FLUTEARENAX:
+            side = -1
+        else:
+            side = 1
+        self.Wavegap = (FLUTEARENAX + side * 265, FLUTEARENAY + 170)
+        self.Wavehit = False
 
-    def release_attack(self):
+    def Releaseattack(self):
 
-        self.attack_animation_time = 0.3
+        self.Attackanimationtime = 0.3
         self.strikes += 1
-        self.recovery = 1.35 if not self.second_phase else 1.05
+        if not self.Secondphase:
+            self.recovery = 1.35
+        else:
+            self.recovery = 1.05
         if self.pattern == 0:
             self.wave = 0.48
         elif self.pattern == 1:
             for angle, curve in [(-35, 68), (0, -74), (35, 68)]:
                 self.projectiles.append(WindOrb(self.screen, self.x, self.y, self.aim.rotate(angle), self.attack, curve))
         elif self.pattern == 2:
-            if math.hypot(self.player.x - self.wave_gap[0], self.player.y - self.wave_gap[1]) > 170:
-                self.player.take_damage(self.attack + 4)
+            if math.hypot(self.player.x - self.Wavegap[0], self.player.y - self.Wavegap[1]) > 170:
+                self.player.Takedamage(self.attack + 4)
         elif self.pattern == 3:
             self.wave = 0.68
         else:
             for angle in (-90, 90, 180):
                 direction = self.aim.rotate(angle)
                 start = pg.Vector2(self.x, self.y) + direction * 95
-                if self.game_map.can_move_circle(start.x, start.y, 14):
+                if self.Gamemap.Canmovecircle(start.x, start.y, 14):
                     orb = WindOrb(self.screen, start.x, start.y, direction.rotate(70), self.attack - 8, 112)
                     orb.speed = 210
                     self.projectiles.append(orb)
 
-    def update_floor_attacks(self, dt):
+    def Updatefloorattacks(self, dt):
 
         if self.wave is None:
             return
@@ -640,24 +658,24 @@ class FluteBoss(PianoBoss):
         self.wave -= elapsed
         if self.pattern == 0:
             offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
-            if 0 < offset.length() < 430 and self.aim.dot(offset.normalize()) > 0.78 and self.can_reach_player():
-                if not self.wave_hit:
-                    self.player.take_damage(self.attack)
-                    self.wave_hit = True
+            if 0 < offset.length() < 430 and self.aim.dot(offset.normalize()) > 0.78 and self.Canreachplayer():
+                if not self.Wavehit:
+                    self.player.Takedamage(self.attack)
+                    self.Wavehit = True
                 push = self.aim * 310 * elapsed
-                self.player._move(push.x, push.y, self.game_map)
-        elif self.pattern == 3 and self.player.dash_time <= 0:
+                self.player._move(push.x, push.y, self.Gamemap)
+        elif self.pattern == 3 and self.player.Dashtime <= 0:
             side = self.aim.rotate(90)
             push = side * 310 * elapsed
             x, y = self.player.x, self.player.y
-            self.player._move(push.x, push.y, self.game_map)
-            if not self.wave_hit and math.hypot(x - self.player.x, y - self.player.y) < push.length() * 0.30:
-                self.player.take_damage(self.attack - 10)
-                self.wave_hit = True
+            self.player._move(push.x, push.y, self.Gamemap)
+            if not self.Wavehit and math.hypot(x - self.player.x, y - self.player.y) < push.length() * 0.30:
+                self.player.Takedamage(self.attack - 10)
+                self.Wavehit = True
         if self.wave == 0:
             self.wave = None
 
-    def draw_wave(self, camera, value, color):
+    def Drawwave(self, camera, value, color):
 
         if self.pattern == 0:
             x, y = camera.apply(self.x, self.y)
@@ -668,13 +686,13 @@ class FluteBoss(PianoBoss):
                     point = origin + direction * (105 + j * 107 + (0.48 - value) * 95)
                     pg.draw.line(self.screen, (163, 220, 198), point, point + direction * 34, 2)
         elif self.pattern == 3:
-            x, y = camera.apply(FLUTE_ARENA_X, FLUTE_ARENA_Y)
+            x, y = camera.apply(FLUTEARENAX, FLUTEARENAY)
             side = self.aim.rotate(90)
             for i in range(18):
                 point = pg.Vector2(x + (i * 83) % 900 - 450, y + (i * 71) % 620 - 310) + side * ((0.68 - value) * 90)
                 pg.draw.line(self.screen, (157, 214, 194), point, point + side * 39, 2)
 
-    def draw_warning(self, x, y):
+    def Drawwarning(self, x, y):
 
         color = (133, 207, 181)
         origin = pg.Vector2(x, y)
@@ -689,7 +707,7 @@ class FluteBoss(PianoBoss):
                 point = origin + self.aim.rotate(angle) * 110
                 pg.draw.circle(self.screen, color, (round(point.x), round(point.y)), 13, 3)
         elif self.pattern == 2:
-            safe = (round(x + self.wave_gap[0] - self.x), round(y + self.wave_gap[1] - self.y))
+            safe = (round(x + self.Wavegap[0] - self.x), round(y + self.Wavegap[1] - self.y))
             pg.draw.circle(self.screen, (211, 236, 189), safe, 170, 4)
             pg.draw.circle(self.screen, (107, 158, 144), safe, 162, 2)
         elif self.pattern == 3:
@@ -706,15 +724,15 @@ class FluteBoss(PianoBoss):
 
 class CelloBoss(PianoBoss):
 
-    arena_room = "Cello Amphitheatre"
-    region_folder = "CelloCatacombs"
+    Arenaroom = "Cello Amphitheatre"
+    Regionfolder = "CelloCatacombs"
     instrument = "Cello"
-    home_position = (CELLO_ARENA_X, CELLO_ARENA_Y)
+    Homeposition = (CELLOARENAX, CELLOARENAY)
 
-    def set_stats(self):
+    def Setstats(self):
 
-        self.max_hp = 1500
-        self.current_hp = self.max_hp
+        self.Maxhp = 1500
+        self.Currenthp = self.Maxhp
         self.attack = 52
         self.speed = 136
         self.size = 84
@@ -727,80 +745,86 @@ class CelloBoss(PianoBoss):
 
         self.moving = False
         super().update(dt)
-        if not self.engaged and self.current_hp > 0:
-            self.x, self.y = self.home_position
+        if not self.engaged and self.Currenthp > 0:
+            self.x, self.y = self.Homeposition
             return
-        if self.current_hp > 0 and self.recovery > 0 and not self.windup and not self.encore and self.wave is None and self.attack_animation_time <= 0:
-            self.move_towards(self.player.x, self.player.y, dt, 145)
+        if self.Currenthp > 0 and self.recovery > 0 and not self.windup and not self.encore and self.wave is None and self.Attackanimationtime <= 0:
+            self.Movetowards(self.player.x, self.player.y, dt, 145)
 
-    def start_phrase(self):
+    def Startphrase(self):
 
         self.pattern = self.strikes % 5
-        self.move_name = ["Downbow", "Bridge Break", "Legato", "Bow Bind", "Bass Steps"][self.pattern]
-        self.windup_length = [0.78, 0.92, 1.0, 1.0, 0.76][self.pattern]
-        if self.second_phase:
-            self.windup_length *= 0.84
-        self.windup = self.windup_length
+        self.Movename = ["Downbow", "Bridge Break", "Legato", "Bow Bind", "Bass Steps"][self.pattern]
+        self.Winduplength = [0.78, 0.92, 1.0, 1.0, 0.76][self.pattern]
+        if self.Secondphase:
+            self.Winduplength *= 0.84
+        self.windup = self.Winduplength
         offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
         if offset.length_squared():
             self.aim = offset.normalize()
-        self.wave_hit = False
+        self.Wavehit = False
         self.chord = []
 
-    def release_attack(self):
+    def Releaseattack(self):
 
-        self.attack_animation_time = 0.3
+        self.Attackanimationtime = 0.3
         self.strikes += 1
-        self.recovery = 1.4 if not self.second_phase else 1.1
+        if not self.Secondphase:
+            self.recovery = 1.4
+        else:
+            self.recovery = 1.1
         if self.pattern == 0:
             offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
-            if 0 <= offset.dot(self.aim) <= 245 and abs(offset.cross(self.aim)) <= 48 and self.can_reach_player():
-                self.player.take_damage(self.attack + 7)
+            if 0 <= offset.dot(self.aim) <= 245 and abs(offset.cross(self.aim)) <= 48 and self.Canreachplayer():
+                self.player.Takedamage(self.attack + 7)
         elif self.pattern == 1:
             self.wave = 0.93
         elif self.pattern == 2:
             self.wave = 1.05
-            self.last_breath_position = (self.player.x, self.player.y)
-            self.breath_still = 0
+            self.Lastbreathposition = (self.player.x, self.player.y)
+            self.Breathstill = 0
         elif self.pattern == 3:
-            if math.hypot(self.player.x - self.x, self.player.y - self.y) < 265 and self.can_reach_player():
-                self.player.take_damage(self.attack)
+            if math.hypot(self.player.x - self.x, self.player.y - self.y) < 265 and self.Canreachplayer():
+                self.player.Takedamage(self.attack)
         else:
             self.wave = 0.76
-            self.bass_steps = 0
+            self.Basssteps = 0
 
-    def update_floor_attacks(self, dt):
+    def Updatefloorattacks(self, dt):
 
         if self.wave is None:
             return
         self.wave = max(0, self.wave - dt)
         offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
-        if self.pattern == 1 and not self.wave_hit:
+        if self.pattern == 1 and not self.Wavehit:
             reach = (0.93 - self.wave) * 475 + 42
             for angle in (-29, 29):
                 line = self.aim.rotate(angle)
-                if abs(offset.dot(line) - reach) < 31 and abs(offset.cross(line)) < 42 and self.can_reach_player():
-                    self.player.take_damage(self.attack)
-                    self.wave_hit = True
-        elif self.pattern == 2 and not self.wave_hit:
-            moved = math.hypot(self.player.x - self.last_breath_position[0], self.player.y - self.last_breath_position[1])
-            self.last_breath_position = (self.player.x, self.player.y)
-            self.breath_still = self.breath_still + dt if moved < dt * 24 else 0
-            if self.breath_still >= 0.38 and offset.length() < 500 and self.can_reach_player():
-                self.player.take_damage(self.attack - 7)
-                self.wave_hit = True
+                if abs(offset.dot(line) - reach) < 31 and abs(offset.cross(line)) < 42 and self.Canreachplayer():
+                    self.player.Takedamage(self.attack)
+                    self.Wavehit = True
+        elif self.pattern == 2 and not self.Wavehit:
+            moved = math.hypot(self.player.x - self.Lastbreathposition[0], self.player.y - self.Lastbreathposition[1])
+            self.Lastbreathposition = (self.player.x, self.player.y)
+            if moved < dt * 24:
+                self.Breathstill = self.Breathstill + dt
+            else:
+                self.Breathstill = 0
+            if self.Breathstill >= 0.38 and offset.length() < 500 and self.Canreachplayer():
+                self.player.Takedamage(self.attack - 7)
+                self.Wavehit = True
         elif self.pattern == 4:
             beat = 1 if self.wave > 0.37 else 2
-            if self.bass_steps < beat:
-                self.bass_steps = beat
-                self.move_towards(self.player.x, self.player.y, 0.24, 120)
-                if math.hypot(self.player.x - self.x, self.player.y - self.y) < 155 and self.can_reach_player():
-                    self.player.take_damage(self.attack - 13)
-                self.attack_animation_time = 0.3
+            if self.Basssteps < beat:
+                self.Basssteps = beat
+                self.Movetowards(self.player.x, self.player.y, 0.24, 120)
+                if math.hypot(self.player.x - self.x, self.player.y - self.y) < 155 and self.Canreachplayer():
+                    self.player.Takedamage(self.attack - 13)
+                self.Attackanimationtime = 0.3
         if self.wave == 0:
             self.wave = None
 
-    def draw_wave(self, camera, value, color):
+    def Drawwave(self, camera, value, color):
 
         x, y = camera.apply(self.x, self.y)
         origin = pg.Vector2(x, y)
@@ -813,13 +837,13 @@ class CelloBoss(PianoBoss):
                 pg.draw.circle(self.screen, (219, 194, 237), (round(tip.x), round(tip.y)), 12, 3)
         elif self.pattern == 2:
             px, py = camera.apply(self.player.x, self.player.y)
-            if not self.wave_hit:
-                pg.draw.arc(self.screen, (217, 190, 234), (px - 29, py - 21, 58, 42), 0, math.tau * min(1, self.breath_still / 0.38), 3)
+            if not self.Wavehit:
+                pg.draw.arc(self.screen, (217, 190, 234), (px - 29, py - 21, 58, 42), 0, math.tau * min(1, self.Breathstill / 0.38), 3)
         elif self.pattern == 4:
             radius = round(92 + (0.76 - value) % 0.38 * 135)
             pg.draw.ellipse(self.screen, (204, 174, 222), (x - radius, y - radius // 2, radius * 2, radius), 3)
 
-    def draw_warning(self, x, y):
+    def Drawwarning(self, x, y):
 
         origin = pg.Vector2(x, y)
         color = (212, 184, 229)
@@ -843,7 +867,7 @@ class CelloBoss(PianoBoss):
                 pg.draw.arc(self.screen, (216, 187, 231), (x - length, y - 71 + index * 11, length * 2, 33), 0.15, 2.9, 2)
         elif self.pattern == 3:
             offset = pg.Vector2(self.player.x - self.x, self.player.y - self.y)
-            if offset.length() < 265 and self.can_reach_player():
+            if offset.length() < 265 and self.Canreachplayer():
                 end = origin + offset
                 bend = origin.lerp(end, 0.5) + offset.rotate(90) * 0.08
                 pg.draw.lines(self.screen, (87, 52, 95), False, [origin, bend, end], 6)
@@ -855,15 +879,15 @@ class CelloBoss(PianoBoss):
 
 class HarpBoss(PianoBoss):
 
-    arena_room = "Harp Chamber"
-    region_folder = "HarpReservoir"
+    Arenaroom = "Harp Chamber"
+    Regionfolder = "HarpReservoir"
     instrument = "Harp"
-    home_position = (HARP_ARENA_X, HARP_ARENA_Y)
+    Homeposition = (HARPARENAX, HARPARENAY)
 
-    def set_stats(self):
+    def Setstats(self):
 
-        self.max_hp = 1650
-        self.current_hp = self.max_hp
+        self.Maxhp = 1650
+        self.Currenthp = self.Maxhp
         self.attack = 55
         self.size = 87
 
@@ -871,42 +895,42 @@ class HarpBoss(PianoBoss):
 
         return 45, 23, 10
 
-    def teleport_anchor(self):
+    def Teleportanchor(self):
 
         for step in range(4):
-            side_x, side_y = [(-1, -1), (1, 1), (1, -1), (-1, 1)][(step + self.teleport_index) % 4]
-            x = HARP_ARENA_X + side_x * 460
-            y = HARP_ARENA_Y + side_y * 375
-            if math.hypot(x - self.player.x, y - self.player.y) > 180 and math.hypot(x - self.x, y - self.y) > 180 and self.can_step(x, y):
+            Sidex, Sidey = [(-1, -1), (1, 1), (1, -1), (-1, 1)][(step + self.Teleportindex) % 4]
+            x = HARPARENAX + Sidex * 460
+            y = HARPARENAY + Sidey * 375
+            if math.hypot(x - self.player.x, y - self.player.y) > 180 and math.hypot(x - self.x, y - self.y) > 180 and self.Canstep(x, y):
                 return x, y
         return None
 
-    def render_teleport(self, camera):
+    def Renderteleport(self, camera):
 
-        for point in (self.teleport_origin, self.teleport_target):
+        for point in (self.Teleportorigin, self.Teleporttarget):
             x, y = camera.apply(*point)
             for offset in (0, 22, 44):
-                radius = round(22 + (1 - self.teleport_time) * 75 + offset)
+                radius = round(22 + (1 - self.Teleporttime) * 75 + offset)
                 pg.draw.ellipse(self.screen, (103, 207, 187), (x - radius, y - radius // 2, radius * 2, radius), 2)
 
-    def start_phrase(self):
+    def Startphrase(self):
 
         self.pattern = self.strikes % 5
-        self.move_name = ["Tide Wells", "Crosscurrent", "Plucked Cascade", "Undertow", "Breaking String"][self.pattern]
-        self.windup_length = [1.02, 0.92, 0.82, 1.10, 0.98][self.pattern]
-        if self.second_phase:
-            self.windup_length *= 0.85
-        self.windup = self.windup_length
+        self.Movename = ["Tide Wells", "Crosscurrent", "Plucked Cascade", "Undertow", "Breaking String"][self.pattern]
+        self.Winduplength = [1.02, 0.92, 0.82, 1.10, 0.98][self.pattern]
+        if self.Secondphase:
+            self.Winduplength *= 0.85
+        self.windup = self.Winduplength
         target = pg.Vector2(self.player.x, self.player.y)
         offset = target - (self.x, self.y)
         if offset.length_squared():
             self.aim = offset.normalize()
         side = self.aim.rotate(90)
         self.chord = [target + side * shift for shift in (-230, 0, 230)]
-        self.lanes = [pg.Rect(HARP_ARENA_X - 600, round(target.y + shift - 44), 1200, 88) for shift in (-205, 0, 205)]
-        self.wave_hit = False
+        self.lanes = [pg.Rect(HARPARENAX - 600, round(target.y + shift - 44), 1200, 88) for shift in (-205, 0, 205)]
+        self.Wavehit = False
 
-    def make_note(self, direction):
+    def Makenote(self, direction):
 
         bolt = Projectile(self.screen, self.x, self.y, direction, self.attack - 14)
         bolt.speed = 330
@@ -914,20 +938,23 @@ class HarpBoss(PianoBoss):
         bolt.colour = (126, 231, 207)
         return bolt
 
-    def release_attack(self):
+    def Releaseattack(self):
 
         self.strikes += 1
-        self.attack_animation_time = 0.3
-        self.recovery = 1.55 if self.second_phase else 1.85
+        self.Attackanimationtime = 0.3
+        if self.Secondphase:
+            self.recovery = 1.55
+        else:
+            self.recovery = 1.85
         if self.pattern == 2:
             self.volley = [-34, -17, 0, 17, 34]
-            self.beat_timer = 0
+            self.Beattimer = 0
         elif self.pattern == 3:
             self.wave = 1.0
         else:
             self.wave = 0.34
 
-    def update_floor_attacks(self, dt):
+    def Updatefloorattacks(self, dt):
 
         if self.wave is None:
             return
@@ -942,22 +969,22 @@ class HarpBoss(PianoBoss):
             hit = abs(offset.length() - (570 * self.wave + 52)) <= 26
         else:
             hit = 0 <= offset.dot(self.aim) <= 620 and abs(offset.cross(self.aim)) <= 54
-        if hit and not self.wave_hit:
-            self.player.take_damage(self.attack)
-            self.wave_hit = True
+        if hit and not self.Wavehit:
+            self.player.Takedamage(self.attack)
+            self.Wavehit = True
         if self.wave == 0:
             self.wave = None
 
-    def draw_warning(self, x, y):
+    def Drawwarning(self, x, y):
 
         if self.windup > 0:
-            self.draw_pattern(x, y, (106, 187, 176), 1.0)
+            self.Drawpattern(x, y, (106, 187, 176), 1.0)
 
-    def draw_wave(self, camera, value, color):
+    def Drawwave(self, camera, value, color):
 
-        self.draw_pattern(*camera.apply(self.x, self.y), (157, 246, 222), value)
+        self.Drawpattern(*camera.apply(self.x, self.y), (157, 246, 222), value)
 
-    def draw_pattern(self, x, y, colour, value):
+    def Drawpattern(self, x, y, colour, value):
 
         shift = pg.Vector2(x - self.x, y - self.y)
         origin = pg.Vector2(x, y)
@@ -982,50 +1009,56 @@ class HarpBoss(PianoBoss):
             end = origin + self.aim * 620
             pg.draw.lines(self.screen, colour, True, [origin + side, end + side, end - side, origin - side], 3)
 
-    def keeper_frame(self):
+    def Keeperframe(self):
 
-        if self.teleport_time > 0:
-            frame = self.keeper_poses[0].copy()
-            frame.set_alpha(round(255 * abs(self.teleport_time - 0.5) * 2))
+        if self.Teleporttime > 0:
+            frame = self.Keeperposes[0].copy()
+            frame.set_alpha(round(255 * abs(self.Teleporttime - 0.5) * 2))
             return frame
-        if self.windup > 0 and self.windup < self.windup_length * 0.73:
-            return self.keeper_poses[1]
-        if self.attack_animation_time > 0:
-            return self.keeper_poses[2 if self.attack_animation_time > 0.085 else 4]
+        if self.windup > 0 and self.windup < self.Winduplength * 0.73:
+            return self.Keeperposes[1]
+        if self.Attackanimationtime > 0:
+            return self.Keeperposes[2 if self.Attackanimationtime > 0.085 else 4]
         if self.volley:
-            return self.keeper_poses[2 if self.beat_timer > 0.06 else 1]
+            return self.Keeperposes[2 if self.Beattimer > 0.06 else 1]
         if self.encore:
-            return self.keeper_poses[1]
-        return self.keeper_poses[0]
+            return self.Keeperposes[1]
+        return self.Keeperposes[0]
 
     def render(self, camera):
 
         super().render(camera)
-        if self.current_hp <= 0 or self.teleport_time > 0:
+        if self.Currenthp <= 0 or self.Teleporttime > 0:
             return
-        if self.attack_animation_time <= 0 and not self.volley:
+        if self.Attackanimationtime <= 0 and not self.volley:
             return
-        progress = 1 - self.attack_animation_time / 0.3 if self.attack_animation_time else 1 - min(1, self.beat_timer / 0.105)
+        if self.Attackanimationtime:
+            progress = 1 - self.Attackanimationtime / 0.3
+        else:
+            progress = 1 - min(1, self.Beattimer / 0.105)
         x, y = camera.apply(self.x, self.y)
         for index in range(5):
             spread = progress * (15 + index * 4)
             px = round(x + 46 + index * 4 + spread)
             py = round(y - 181 + index * 18 - spread * 0.36)
-            colour = (164, 242, 219) if progress < 0.55 else (93, 171, 160)
+            if progress < 0.55:
+                colour = (164, 242, 219)
+            else:
+                colour = (93, 171, 160)
             pg.draw.line(self.screen, colour, (px, py), (px + 4, py - 3), 2)
 
 
 class ViolinBoss(PianoBoss):
 
-    arena_room = "Performance Hall"
-    region_folder = "ViolinHall"
+    Arenaroom = "Performance Hall"
+    Regionfolder = "ViolinHall"
     instrument = "Violin"
-    home_position = (10880, 20320)
+    Homeposition = (10880, 20320)
 
-    def set_stats(self):
+    def Setstats(self):
 
-        self.max_hp = 1750
-        self.current_hp = self.max_hp
+        self.Maxhp = 1750
+        self.Currenthp = self.Maxhp
         self.attack = 56
         self.size = 65
 
@@ -1033,48 +1066,54 @@ class ViolinBoss(PianoBoss):
 
         return 29, 17, 7
 
-    def teleport_anchor(self):
+    def Teleportanchor(self):
 
         for step in range(4):
-            dx, dy = [(-470, -340), (470, 340), (470, -340), (-470, 340)][(self.teleport_index + step) % 4]
-            x, y = self.home_position[0] + dx, self.home_position[1] + dy
-            if math.hypot(x - self.x, y - self.y) > 160 and math.hypot(x - self.player.x, y - self.player.y) > 165 and self.can_step(x, y):
+            dx, dy = [(-470, -340), (470, 340), (470, -340), (-470, 340)][(self.Teleportindex + step) % 4]
+            x, y = self.Homeposition[0] + dx, self.Homeposition[1] + dy
+            if math.hypot(x - self.x, y - self.y) > 160 and math.hypot(x - self.player.x, y - self.player.y) > 165 and self.Canstep(x, y):
                 return x, y
         return None
 
-    def render_teleport(self, camera):
+    def Renderteleport(self, camera):
 
-        for point in (self.teleport_origin, self.teleport_target):
+        for point in (self.Teleportorigin, self.Teleporttarget):
             x, y = camera.apply(*point)
-            progress = 1 - abs(2 * self.teleport_time - 1)
+            progress = 1 - abs(2 * self.Teleporttime - 1)
             for offset in (-24, 0, 24):
                 height = round(20 + 95 * progress)
                 pg.draw.line(self.screen, (208, 151, 177), (x + offset, y), (x + offset, y - height), 2)
 
-    def start_phrase(self):
+    def Startphrase(self):
 
         self.pattern = self.strikes % 5
-        self.move_name = ["Bow Cut", "Crossed Strings", "Three Marks", "Pinch", "Final Rest"][self.pattern]
-        self.windup_length = [0.79, 0.98, 0.89, 1.04, 1.12][self.pattern]
-        if self.second_phase:
-            self.windup_length *= 0.85
-        self.windup = self.windup_length
+        self.Movename = ["Bow Cut", "Crossed Strings", "Three Marks", "Pinch", "Final Rest"][self.pattern]
+        self.Winduplength = [0.79, 0.98, 0.89, 1.04, 1.12][self.pattern]
+        if self.Secondphase:
+            self.Winduplength *= 0.85
+        self.windup = self.Winduplength
         target = pg.Vector2(self.player.x, self.player.y)
         offset = target - (self.x, self.y)
         if offset.length_squared():
             self.aim = offset.normalize()
         side = self.aim.rotate(90)
         self.chord = [target - side * 168, target, target + side * 168]
-        self.wave_hit = False
+        self.Wavehit = False
 
-    def release_attack(self):
+    def Releaseattack(self):
 
         self.strikes += 1
-        self.attack_animation_time = 0.3
-        self.recovery = 1.5 if self.second_phase else 1.8
-        self.wave = 0.78 if self.pattern in (2, 3) else 0.32
+        self.Attackanimationtime = 0.3
+        if self.Secondphase:
+            self.recovery = 1.5
+        else:
+            self.recovery = 1.8
+        if self.pattern in (2, 3):
+            self.wave = 0.78
+        else:
+            self.wave = 0.32
 
-    def string_lines(self, value):
+    def Stringlines(self, value):
 
         if self.pattern == 0:
             return [(pg.Vector2(self.x, self.y), self.aim, 400, 32)]
@@ -1084,7 +1123,7 @@ class ViolinBoss(PianoBoss):
         gap = 54 + round(138 * value / 0.78)
         return [(self.chord[1] + side * offset, self.aim, 490, 28) for offset in (-gap, gap)]
 
-    def update_floor_attacks(self, dt):
+    def Updatefloorattacks(self, dt):
 
         if self.wave is None:
             return
@@ -1097,33 +1136,36 @@ class ViolinBoss(PianoBoss):
             hit = 145 <= point.distance_to((self.x, self.y)) <= 425
         else:
             hit = False
-            for origin, direction, length, width in self.string_lines(self.wave):
+            for origin, direction, length, width in self.Stringlines(self.wave):
                 offset = point - origin
                 start = 0 if self.pattern == 0 else -length
                 if start <= offset.dot(direction) <= length and abs(offset.cross(direction)) <= width:
                     hit = True
-        if hit and not self.wave_hit:
-            self.player.take_damage(self.attack)
-            self.wave_hit = True
+        if hit and not self.Wavehit:
+            self.player.Takedamage(self.attack)
+            self.Wavehit = True
         if self.wave == 0:
             self.wave = None
 
-    def draw_warning(self, x, y):
+    def Drawwarning(self, x, y):
 
         if self.windup > 0:
-            self.draw_strings(x, y, (186, 145, 175), 0.78, True)
+            self.Drawstrings(x, y, (186, 145, 175), 0.78, True)
 
-    def draw_wave(self, camera, value, color):
+    def Drawwave(self, camera, value, color):
 
         x, y = camera.apply(self.x, self.y)
-        self.draw_strings(x, y, (236, 188, 207), value, False)
+        self.Drawstrings(x, y, (236, 188, 207), value, False)
 
-    def draw_strings(self, x, y, colour, value, warning):
+    def Drawstrings(self, x, y, colour, value, warning):
 
         shift = pg.Vector2(x - self.x, y - self.y)
         if self.pattern == 2:
             index = min(2, int((0.78 - value) / 0.26))
-            marks = self.chord if warning else [self.chord[index]]
+            if warning:
+                marks = self.chord
+            else:
+                marks = [self.chord[index]]
             for point in marks:
                 pg.draw.circle(self.screen, colour, point + shift, 76, 3)
                 if not warning:
@@ -1134,50 +1176,59 @@ class ViolinBoss(PianoBoss):
             if not warning:
                 pg.draw.circle(self.screen, colour, (x, y), round(145 + 280 * value / 0.32), 2)
         else:
-            for point, direction, length, width in self.string_lines(value):
+            for point, direction, length, width in self.Stringlines(value):
                 point = point + shift
-                start = point if self.pattern == 0 else point - direction * length
+                if self.pattern == 0:
+                    start = point
+                else:
+                    start = point - direction * length
                 end = point + direction * length
                 side = direction.rotate(90) * width
                 pg.draw.lines(self.screen, colour, True, [start - side, end - side, end + side, start + side], 2)
                 if not warning:
                     pg.draw.line(self.screen, colour, start, end, 4)
             if self.pattern == 3 and warning:
-                for point, direction, length, width in self.string_lines(0):
+                for point, direction, length, width in self.Stringlines(0):
                     start = point + shift - direction * length
                     pg.draw.line(self.screen, colour, start, start + direction * length * 2, 1)
 
-    def keeper_frame(self):
+    def Keeperframe(self):
 
-        if self.teleport_time:
-            frame = self.keeper_poses[0].copy()
-            frame.set_alpha(round(510 * abs(self.teleport_time - 0.5)))
+        if self.Teleporttime:
+            frame = self.Keeperposes[0].copy()
+            frame.set_alpha(round(510 * abs(self.Teleporttime - 0.5)))
             return frame
         index = 0
         if self.windup > 0:
-            progress = 1 - self.windup / self.windup_length
+            progress = 1 - self.windup / self.Winduplength
             if progress >= 0.22:
                 index = 1
-        elif self.attack_animation_time > 0:
-            index = 2 if self.attack_animation_time >= 0.10 else 1
+        elif self.Attackanimationtime > 0:
+            if self.Attackanimationtime >= 0.10:
+                index = 2
+            else:
+                index = 1
         elif self.encore > 0:
             index = 1
-        frame = self.keeper_poses[index]
+        frame = self.Keeperposes[index]
         return pg.transform.flip(frame, True, False) if self.aim.x < 0 else frame
 
     def render(self, camera):
 
         super().render(camera)
-        if self.current_hp <= 0 or self.teleport_time > 0 or self.attack_animation_time <= 0.10:
+        if self.Currenthp <= 0 or self.Teleporttime > 0 or self.Attackanimationtime <= 0.10:
             return
-        progress = 1 - self.attack_animation_time / 0.3
+        progress = 1 - self.Attackanimationtime / 0.3
         x, y = camera.apply(self.x, self.y)
-        offset_x, offset_y = boss_pose_offset(self)
-        x += offset_x
-        y += offset_y
+        Offsetx, Offsety = Bossposeoffset(self)
+        x += Offsetx
+        y += Offsety
         side = -1 if self.aim.x < 0 else 1
         reach = round(20 * progress)
-        colour = (217, 170, 185) if progress < 0.38 else (156, 111, 144)
+        if progress < 0.38:
+            colour = (217, 170, 185)
+        else:
+            colour = (156, 111, 144)
         start = (x + side * (31 + reach), y - 105 + reach // 2)
         middle = (x + side * (47 + reach), y - 97 + reach)
         end = (x + side * (59 + reach), y - 86 + reach)

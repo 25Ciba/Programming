@@ -1,10 +1,10 @@
 import pygame as pg
 from Ruins import RuinsArt, RuinsProp
 
-GUITAR_ARENA_X = 1220
-GUITAR_ARENA_Y = 10880
+GUITARARENAX = 1220
+GUITARARENAY = 10880
 
-GUITAR_HABITATS = [
+GUITARHABITATS = [
     ("Copper Crawler", "Common", 3320, 10520),
     ("Copper Crawler", "Common", 3430, 10440),
     ("Rustwing Bat", "Strong", 3450, 10600),
@@ -23,7 +23,7 @@ GUITAR_HABITATS = [
     ("Rustwing Bat", "Strong", 4090, 13280)
 ]
 
-GUITAR_NOTES = [
+GUITARNOTES = [
     (3840, 10880, "Read the copper marker", "The western cavern carries every plucked note twice. The second echo comes from deeper down."),
     (3840, 8640, "Inspect the string spool", "Copper wire and silk. The luthier used both when the old strings went quiet."),
     (6080, 10635, "Pluck the workshop guitar", "The string still holds its tuning. A second note answers from the rock."),
@@ -39,7 +39,7 @@ GUITAR_NOTES = [
     (6080, 11285, "Test the spare strings", "Three spare strings are still tuned. Someone was ready to come back.")
 ]
 
-GUITAR_LANDMARKS = [
+GUITARLANDMARKS = [
     (6080, 10490, 0, 166),
     (3600, 10690, 2, 66),
     (4080, 10690, 2, 66),
@@ -58,7 +58,7 @@ GUITAR_LANDMARKS = [
 
 
 # Each group has a purpose and keeps the middle of the travel lanes clear.
-GUITAR_GROUPS = [
+GUITARGROUPS = [
     # String Hollow: loading bay, parked carts, and storage alongside the track.
     [
         (3550, 11470, 5, 141), (3380, 11025, 3, 79),
@@ -101,7 +101,7 @@ GUITAR_GROUPS = [
 ]
 
 
-def creature_pose_frames(folder, stem, scale, airborne):
+def Creatureposeframes(folder, stem, scale, airborne):
 
     sprites = []
     for index in range(4):
@@ -166,9 +166,9 @@ def creature_pose_frames(folder, stem, scale, airborne):
 
 class GuitarArt(RuinsArt):
 
-    def __init__(self, image_folder, ruins_art):
+    def __init__(self, Imagefolder, Ruinsart):
 
-        folder = image_folder / "GuitarCaverns"
+        folder = Imagefolder / "GuitarCaverns"
         tile = pg.transform.scale(pg.image.load(folder / "Flagstones.png").convert(), (256, 256))
         self.floors = [("", tile)]
         for name, tint in [
@@ -181,13 +181,13 @@ class GuitarArt(RuinsArt):
             floor = tile.copy()
             floor.fill(tint, special_flags=pg.BLEND_RGB_MULT)
             self.floors.append((name, floor))
-        self.wall_face = ruins_art.wall_face.copy()
-        self.wall_face.fill((245, 183, 153), special_flags=pg.BLEND_RGB_MULT)
-        pg.draw.rect(self.wall_face, (143, 104, 85), (0, 0, 128, 4))
-        self.wall_banner = ruins_art.wall_banner.copy()
-        self.wall_banner.fill((255, 204, 143), special_flags=pg.BLEND_RGB_MULT)
-        self.wall_sconce = ruins_art.wall_sconce
-        self.lantern_glow = ruins_art.lantern_glow
+        self.Wallface = Ruinsart.Wallface.copy()
+        self.Wallface.fill((245, 183, 153), special_flags=pg.BLEND_RGB_MULT)
+        pg.draw.rect(self.Wallface, (143, 104, 85), (0, 0, 128, 4))
+        self.Wallbanner = Ruinsart.Wallbanner.copy()
+        self.Wallbanner.fill((255, 204, 143), special_flags=pg.BLEND_RGB_MULT)
+        self.Wallsconce = Ruinsart.Wallsconce
+        self.Lanternglow = Ruinsart.Lanternglow
         self.sprites = []
         for name in ("Workbench", "Arch", "Lantern", "Spools", "Rack", "Cart", "Bellows", "Furnace", "Winch", "OreSeam"):
             self.sprites.append(pg.image.load(folder / f"{name}.png").convert_alpha())
@@ -197,11 +197,11 @@ class GuitarArt(RuinsArt):
         self.bases = []
         self.lanterns = []
         self.fragments = []
-        self.bellows_until = 0
-        self.furnace_until = 0
-        self.signals_until = 0
+        self.Bellowsuntil = 0
+        self.Furnaceuntil = 0
+        self.Signalsuntil = 0
 
-    def add_prop(self, x, y, index, width):
+    def Addprop(self, x, y, index, width):
 
         sprite = self.sprites[index]
         height = round(sprite.get_height() * width / sprite.get_width())
@@ -212,11 +212,11 @@ class GuitarArt(RuinsArt):
 
     def populate(self):
 
-        for x, y, index, width in GUITAR_LANDMARKS:
-            self.add_prop(x, y, index, width)
-        for group in GUITAR_GROUPS:
+        for x, y, index, width in GUITARLANDMARKS:
+            self.Addprop(x, y, index, width)
+        for group in GUITARGROUPS:
             for x, y, index, width in group:
-                self.add_prop(x, y, index, width)
+                self.Addprop(x, y, index, width)
         # Chips and loose hardware sit next to their source props.
         for prop in self.props:
             for dx, dy, size in [(-23, 27, 6), (16, 31, 9), (29, 21, 4)]:
@@ -229,29 +229,29 @@ class GuitarArt(RuinsArt):
                 return True
         return False
 
-    def nearby_readable(self, player):
+    def Nearbyreadable(self, player):
 
-        for x, y, label, message in GUITAR_NOTES:
+        for x, y, label, message in GUITARNOTES:
             if abs(player.x - x) < 135 and abs(player.y - y) < 100:
                 return label, message
         return None
 
     def interact(self, player):
 
-        readable = self.nearby_readable(player)
+        readable = self.Nearbyreadable(player)
         if readable and readable[0] == "Pump the resonance bellows":
-            self.bellows_until = pg.time.get_ticks() + 2200
+            self.Bellowsuntil = pg.time.get_ticks() + 2200
         elif readable and readable[0] == "Stoke the furnace":
-            self.furnace_until = pg.time.get_ticks() + 5000
+            self.Furnaceuntil = pg.time.get_ticks() + 5000
         elif readable and readable[0] == "Turn the loading winch":
-            self.signals_until = pg.time.get_ticks() + 5000
+            self.Signalsuntil = pg.time.get_ticks() + 5000
         return readable
 
-    def render_workshop_floor(self, screen, camera):
+    def Renderworkshopfloor(self, screen, camera):
 
         view = screen.get_rect()
-        for center_x, center_y, width, height in [(6080, 10510, 270, 138), (5750, 10600, 180, 132), (6410, 10600, 180, 132), (5740, 10875, 145, 120), (6420, 10875, 145, 120), (5870, 11270, 170, 104), (6290, 11270, 170, 104)]:
-            x, y = camera.apply(center_x, center_y)
+        for Centerx, Centery, width, height in [(6080, 10510, 270, 138), (5750, 10600, 180, 132), (6410, 10600, 180, 132), (5740, 10875, 145, 120), (6420, 10875, 145, 120), (5870, 11270, 170, 104), (6290, 11270, 170, 104)]:
+            x, y = camera.apply(Centerx, Centery)
             area = pg.Rect(x - width // 2, y - height // 2, width, height)
             if not view.colliderect(area):
                 continue
@@ -277,15 +277,15 @@ class GuitarArt(RuinsArt):
     def render(self, screen, camera):
 
         view = screen.get_rect()
-        region_x, region_y = camera.apply(600, 7750)
-        if not view.colliderect((region_x, region_y, 6500, 6500)):
+        Regionx, Regiony = camera.apply(600, 7750)
+        if not view.colliderect((Regionx, Regiony, 6500, 6500)):
             return
-        light_view = view.inflate(216, 216)
-        self.render_workshop_floor(screen, camera)
-        arena_center = camera.apply(GUITAR_ARENA_X, GUITAR_ARENA_Y)
-        arena_rect = self.rosette.get_rect(center=arena_center)
-        if view.colliderect(arena_rect):
-            screen.blit(self.rosette, arena_rect)
+        Lightview = view.inflate(216, 216)
+        self.Renderworkshopfloor(screen, camera)
+        Arenacenter = camera.apply(GUITARARENAX, GUITARARENAY)
+        Arenarect = self.rosette.get_rect(center=Arenacenter)
+        if view.colliderect(Arenarect):
+            screen.blit(self.rosette, Arenarect)
         # Both carts share one loading track. A crossbar marks the dead end.
         x, y = camera.apply(3550, 10965)
         for offset in range(-30, 546, 18):
@@ -296,31 +296,37 @@ class GuitarArt(RuinsArt):
             pg.draw.line(screen, (153, 111, 73), (x + rail, y - 32), (x + rail, y + 552), 3)
         pg.draw.line(screen, (120, 82, 56), (x - 37, y + 552), (x + 37, y + 552), 8)
         # Worn thresholds frame the workshop and vault entrances.
-        for world_x, world_y, width in [(5670, 10880, 174), (3840, 12655, 235), (3840, 9120, 202)]:
-            px, py = camera.apply(world_x, world_y)
+        for Worldx, Worldy, width in [(5670, 10880, 174), (3840, 12655, 235), (3840, 9120, 202)]:
+            px, py = camera.apply(Worldx, Worldy)
             for offset in range(-width // 2, width // 2, 22):
                 pg.draw.rect(screen, (69, 51, 51), (px + offset, py - 4, 20, 12))
                 pg.draw.rect(screen, (126, 87, 64), (px + offset, py - 4, 20, 2))
-        if self.bellows_until > pg.time.get_ticks():
+        if self.Bellowsuntil > pg.time.get_ticks():
             x, y = camera.apply(4090, 12780)
-            screen.blit(self.lantern_glow, (x - 108, y - 108))
+            screen.blit(self.Lanternglow, (x - 108, y - 108))
             for i in range(5):
                 shift = (pg.time.get_ticks() // 26 + i * 13) % 65
                 pg.draw.rect(screen, (204, 122, 61), (x + i * 7 - 14, y - shift, 3, 3))
         now = pg.time.get_ticks()
-        if self.furnace_until > now:
+        if self.Furnaceuntil > now:
             x, y = camera.apply(3430, 12765)
-            screen.blit(self.lantern_glow, (x - 108, y - 105))
+            screen.blit(self.Lanternglow, (x - 108, y - 105))
             for i in range(15):
                 lift = (now // 24 + i * 11) % 97
                 drift = (i * 19) % 73 - 36
-                colour = (211, 132, 67) if i % 3 else (245, 179, 92)
+                if i % 3:
+                    colour = (211, 132, 67)
+                else:
+                    colour = (245, 179, 92)
                 pg.draw.rect(screen, colour, (x + drift, y - lift, 2 + i % 2, 3))
-        for i, world_y in enumerate((11000, 11180, 11360, 11530)):
-            x, y = camera.apply(3598, world_y)
+        for i, Worldy in enumerate((11000, 11180, 11360, 11530)):
+            x, y = camera.apply(3598, Worldy)
             pg.draw.rect(screen, (45, 39, 49), (x - 5, y - 5, 13, 13))
-            active = self.signals_until > now and (now // 180 + i) % 5 < 4
-            color = (245, 174, 83) if active else (107, 77, 62)
+            active = self.Signalsuntil > now and (now // 180 + i) % 5 < 4
+            if active:
+                color = (245, 174, 83)
+            else:
+                color = (107, 77, 62)
             pg.draw.rect(screen, color, (x - 2, y - 2, 7, 7))
         for x, y, size in self.fragments:
             px, py = camera.apply(x, y)
@@ -329,9 +335,9 @@ class GuitarArt(RuinsArt):
                 pg.draw.line(screen, (126, 93, 73), (px, py), (px + size, py + 2), 2)
         for x, y in self.lanterns:
             px, py = camera.apply(x, y)
-            if light_view.collidepoint(px, py):
-                screen.blit(self.lantern_glow, (px - 108, py - 122))
-        for x, y, label, message in GUITAR_NOTES:
+            if Lightview.collidepoint(px, py):
+                screen.blit(self.Lanternglow, (px - 108, py - 122))
+        for x, y, label, message in GUITARNOTES:
             px, py = camera.apply(x, y)
             pg.draw.ellipse(screen, (34, 31, 40), (px - 19, py - 4, 41, 14))
             pg.draw.polygon(screen, (135, 102, 77), [(px - 15, py - 7), (px + 13, py - 10), (px + 17, py + 3), (px - 12, py + 7)])

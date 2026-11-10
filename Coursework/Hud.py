@@ -1,14 +1,14 @@
 import pygame as pg
-from DungeonLayout import REGIONS, BOSS_ROOMS, GATES
-from Frost import LAKE_X, LAKE_Y, LAKE_WIDTH, LAKE_HEIGHT
+from DungeonLayout import REGIONS, BOSSROOMS, GATES
+from Frost import LAKEX, LAKEY, LAKEWIDTH, LAKEHEIGHT
 from RogueArt import DIRECTIONS
-from Menus import KEYS, key_name
+from Menus import KEYS, Keyname
 
 INK = (17, 21, 34)
 EDGE = (86, 87, 113)
 GOLD = (192, 157, 99)
 TEXT = (231, 228, 237)
-FLOOR_COLOURS = [
+FLOORCOLOURS = [
     (100, 112, 143), (105, 155, 182), (151, 109, 83), (151, 132, 164),
     (161, 131, 90), (86, 143, 148), (169, 149, 99)
 ]
@@ -43,7 +43,7 @@ def meter(screen, font, rect, name, value, maximum, dark, light):
         pg.draw.line(screen, (28, 27, 44), (x, inner.y + 2), (x, inner.bottom - 1), 1)
 
 
-def draw_status(screen, font, player):
+def Drawstatus(screen, font, player):
 
     outer = pg.Rect(14, 14, 514, 78)
     panel(screen, outer)
@@ -63,36 +63,36 @@ def draw_status(screen, font, player):
     health = pg.Rect(rail.x, rail.y, 171, rail.height)
     mana = pg.Rect(health.right, rail.y, 136, rail.height)
     lives = pg.Rect(mana.right, rail.y, rail.right - mana.right, rail.height)
-    meter(screen, font, health, "HEALTH", player.current_hp, player.max_hp, (149, 44, 64), (233, 113, 127))
-    meter(screen, font, mana, "MANA", player.current_mana, player.max_mana, (49, 92, 159), (108, 201, 228))
+    meter(screen, font, health, "HEALTH", player.Currenthp, player.Maxhp, (149, 44, 64), (233, 113, 127))
+    meter(screen, font, mana, "MANA", player.Currentmana, player.Maxmana, (49, 92, 159), (108, 201, 228))
     for x in (health.right, mana.right):
         pg.draw.rect(screen, (159, 128, 91), (x - 1, rail.y + 2, 2, rail.height - 4))
     screen.blit(font.render("LIVES", True, TEXT), (lives.x + 9, lives.y - 18))
-    count = font.render(f"{player.current_lives}/{player.max_lives}", True, (198, 192, 211))
+    count = font.render(f"{player.Currentlives}/{player.Maxlives}", True, (198, 192, 211))
     screen.blit(count, count.get_rect(topright=(lives.right - 9, lives.y - 18)))
-    spacing = min(15, (lives.width - 12) / max(1, player.max_lives))
+    spacing = min(15, (lives.width - 12) / max(1, player.Maxlives))
     size = max(2, min(6, round(spacing / 2) - 1))
-    start_x = lives.centerx - (player.max_lives - 1) * spacing / 2
-    for i in range(player.max_lives):
-        x = round(start_x + i * spacing)
+    Startx = lives.centerx - (player.Maxlives - 1) * spacing / 2
+    for i in range(player.Maxlives):
+        x = round(Startx + i * spacing)
         y = lives.centery
         points = [(x, y - 7), (x + size, y), (x, y + 7), (x - size, y)]
-        active = i < player.current_lives
+        active = i < player.Currentlives
         pg.draw.polygon(screen, (184, 131, 67) if active else (60, 54, 72), points)
         if active:
             pg.draw.line(screen, (249, 216, 142), (x - size + 1, y - 1), (x, y - 6), 2)
 
 
-def map_rect(rect, origin_x, origin_y, scale):
+def Maprect(rect, Originx, Originy, scale):
 
-    left = round(origin_x + rect.left * scale)
-    top = round(origin_y + rect.top * scale)
-    right = round(origin_x + rect.right * scale)
-    bottom = round(origin_y + rect.bottom * scale)
+    left = round(Originx + rect.left * scale)
+    top = round(Originy + rect.top * scale)
+    right = round(Originx + rect.right * scale)
+    bottom = round(Originy + rect.bottom * scale)
     return pg.Rect(left, top, max(1, right - left), max(1, bottom - top))
 
 
-def paint_map(screen, game_map, area, origin_x, origin_y, scale, local=False):
+def Paintmap(screen, Gamemap, area, Originx, Originy, scale, local=False):
 
     clip = screen.get_clip()
     screen.set_clip(area)
@@ -100,48 +100,51 @@ def paint_map(screen, game_map, area, origin_x, origin_y, scale, local=False):
     for x in range(area.left + 12, area.right, 15 if local else 19):
         for y in range(area.top + 12, area.bottom, 15 if local else 19):
             pg.draw.rect(screen, (28, 32, 46), (x, y, 1, 1))
-    for region, rect in game_map.corridors:
-        pg.draw.rect(screen, (77, 79, 100), map_rect(rect, origin_x, origin_y, scale))
-    for name, region, rect in game_map.room_floors:
-        pg.draw.rect(screen, FLOOR_COLOURS[region], map_rect(rect, origin_x, origin_y, scale))
-    lake = pg.Rect(LAKE_X - LAKE_WIDTH // 2, LAKE_Y - LAKE_HEIGHT // 2, LAKE_WIDTH, LAKE_HEIGHT)
-    pg.draw.ellipse(screen, (42, 82, 117), map_rect(lake, origin_x, origin_y, scale))
-    for pool in game_map.harp_art.pools:
-        pg.draw.ellipse(screen, (37, 82, 101), map_rect(pool, origin_x, origin_y, scale))
-    for rect in game_map.arena_art.partitions:
-        pg.draw.rect(screen, (43, 47, 65), map_rect(rect, origin_x, origin_y, scale))
-    for door in game_map.arena_art.doors:
-        x = round(origin_x + door.x * scale)
-        y = round(origin_y + door.y * scale)
+    for region, rect in Gamemap.corridors:
+        pg.draw.rect(screen, (77, 79, 100), Maprect(rect, Originx, Originy, scale))
+    for name, region, rect in Gamemap.Roomfloors:
+        pg.draw.rect(screen, FLOORCOLOURS[region], Maprect(rect, Originx, Originy, scale))
+    lake = pg.Rect(LAKEX - LAKEWIDTH // 2, LAKEY - LAKEHEIGHT // 2, LAKEWIDTH, LAKEHEIGHT)
+    pg.draw.ellipse(screen, (42, 82, 117), Maprect(lake, Originx, Originy, scale))
+    for pool in Gamemap.Harpart.pools:
+        pg.draw.ellipse(screen, (37, 82, 101), Maprect(pool, Originx, Originy, scale))
+    for rect in Gamemap.Arenaart.partitions:
+        pg.draw.rect(screen, (43, 47, 65), Maprect(rect, Originx, Originy, scale))
+    for door in Gamemap.Arenaart.doors:
+        x = round(Originx + door.x * scale)
+        y = round(Originy + door.y * scale)
         pg.draw.rect(screen, GOLD, (x - 2, y - 2, 5, 5))
     if local:
-        props = game_map.ruins_art.props + game_map.frost_art.props + game_map.guitar_art.props + game_map.flute_art.props + game_map.cello_art.props + game_map.harp_art.props
+        props = Gamemap.Ruinsart.props + Gamemap.Frostart.props + Gamemap.Guitarart.props + Gamemap.Fluteart.props + Gamemap.Celloart.props + Gamemap.Harpart.props
         for prop in props:
-            x = round(origin_x + prop.x * scale)
-            y = round(origin_y + prop.y * scale)
+            x = round(Originx + prop.x * scale)
+            y = round(Originy + prop.y * scale)
             if area.collidepoint(x, y):
                 pg.draw.rect(screen, (64, 61, 77), (x - 2, y - 2, 4, 4))
     else:
-        for region_a, region_b, x, y in GATES:
-            pg.draw.circle(screen, (131, 123, 107), (round(origin_x + x * scale), round(origin_y + y * scale)), 2)
-        for name, region, rect in game_map.rooms:
-            if name in BOSS_ROOMS:
-                x = round(origin_x + rect.centerx * scale)
-                y = round(origin_y + rect.centery * scale)
-                colour = (244, 204, 143) if name == BOSS_ROOMS[0] else (225, 163, 185)
+        for Regiona, Regionb, x, y in GATES:
+            pg.draw.circle(screen, (131, 123, 107), (round(Originx + x * scale), round(Originy + y * scale)), 2)
+        for name, region, rect in Gamemap.rooms:
+            if name in BOSSROOMS:
+                x = round(Originx + rect.centerx * scale)
+                y = round(Originy + rect.centery * scale)
+                if name == BOSSROOMS[0]:
+                    colour = (244, 204, 143)
+                else:
+                    colour = (225, 163, 185)
                 pg.draw.polygon(screen, (37, 35, 55), [(x, y - 7), (x + 7, y), (x, y + 7), (x - 7, y)])
                 pg.draw.polygon(screen, colour, [(x, y - 5), (x + 5, y), (x, y + 5), (x - 5, y)])
     screen.set_clip(clip)
 
 
-def draw_minimap(screen, font, game_map, player):
+def Drawminimap(screen, font, Gamemap, player):
 
     rect = pg.Rect(screen.get_width() - 218, 14, 204, 214)
     panel(screen, rect)
     area = pg.Rect(rect.x + 9, rect.y + 25, 186, 178)
     # The minimap reaches twice as far from the Rogue as the clear view.
     scale = area.height / (player.pvisionRadius() * 4)
-    paint_map(screen, game_map, area, area.centerx - player.x * scale, area.centery - player.y * scale, scale, local=True)
+    Paintmap(screen, Gamemap, area, area.centerx - player.x * scale, area.centery - player.y * scale, scale, local=True)
     pg.draw.rect(screen, EDGE, area, 1)
     center = pg.Vector2(area.center)
     forward = pg.Vector2(DIRECTIONS[player.facing]).normalize()
@@ -150,29 +153,29 @@ def draw_minimap(screen, font, game_map, player):
     pg.draw.circle(screen, INK, area.center, 7)
     pg.draw.polygon(screen, (251, 238, 205), [center + forward * 7, center - forward * 4 + side * 4, center - forward * 4 - side * 4])
     screen.blit(font.render("LOCAL MAP", True, TEXT), (rect.x + 10, rect.y + 7))
-    hint = font.render(key_name(KEYS["Map"]), True, GOLD)
+    hint = font.render(Keyname(KEYS["Map"]), True, GOLD)
     screen.blit(hint, hint.get_rect(topright=(rect.right - 12, rect.top + 7)))
 
 
-def draw_overview(screen, title_font, font, game_map, player, world_width, world_height):
+def Drawoverview(screen, Titlefont, font, Gamemap, player, Worldwidth, Worldheight):
 
     screen.fill((10, 13, 23))
     rect = pg.Rect(0, 0, 886, 724)
     rect.center = screen.get_rect().center
     panel(screen, rect)
-    screen.blit(title_font.render("MELODY OF THE MIST", True, TEXT), (rect.x + 22, rect.y + 15))
-    hint = font.render(f"{key_name(KEYS['Map'])}   Return to game", True, GOLD)
+    screen.blit(Titlefont.render("MELODY OF THE MIST", True, TEXT), (rect.x + 22, rect.y + 15))
+    hint = font.render(f"{Keyname(KEYS['Map'])}   Return to game", True, GOLD)
     screen.blit(hint, hint.get_rect(topright=(rect.right - 22, rect.top + 21)))
     area = pg.Rect(rect.x + 18, rect.y + 52, 650, 650)
-    scale = min((area.width - 22) / world_width, (area.height - 22) / world_height)
-    origin_x = area.centerx - world_width * scale / 2
-    origin_y = area.centery - world_height * scale / 2
-    paint_map(screen, game_map, area, origin_x, origin_y, scale)
+    scale = min((area.width - 22) / Worldwidth, (area.height - 22) / Worldheight)
+    Originx = area.centerx - Worldwidth * scale / 2
+    Originy = area.centery - Worldheight * scale / 2
+    Paintmap(screen, Gamemap, area, Originx, Originy, scale)
     pg.draw.rect(screen, EDGE, area, 1)
-    x, y = round(origin_x + player.x * scale), round(origin_y + player.y * scale)
+    x, y = round(Originx + player.x * scale), round(Originy + player.y * scale)
     pg.draw.circle(screen, INK, (x, y), 6)
     pg.draw.circle(screen, (255, 247, 219), (x, y), 4)
-    labels = [(name, FLOOR_COLOURS[i]) for i, (name, colour) in enumerate(REGIONS)]
+    labels = [(name, FLOORCOLOURS[i]) for i, (name, colour) in enumerate(REGIONS)]
     labels += [("You", (255, 247, 219)), ("Boss entrance", GOLD), ("First boss arena", (244, 204, 143)), ("Ultra Boss arena", (225, 163, 185))]
     for i, (label, colour) in enumerate(labels):
         y = rect.y + 76 + i * 29
@@ -183,7 +186,7 @@ def draw_overview(screen, title_font, font, game_map, player, world_width, world
 
 
 
-def draw_aim_ring(screen, position, direction):
+def Drawaimring(screen, position, direction):
 
     radius = 61
     guide = pg.Surface((128, 128), pg.SRCALPHA)

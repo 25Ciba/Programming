@@ -2,7 +2,7 @@ import math
 import pygame as pg
 
 
-def load_boss_steps(folder, ready):
+def Loadbosssteps(folder, ready):
 
     idle = pg.image.load(folder / "Motion0.png").convert_alpha()
     idle = pg.transform.scale(idle, ready.get_size())
@@ -22,7 +22,7 @@ def load_boss_steps(folder, ready):
     return frames
 
 
-def original_keeper_steps(ready):
+def Originalkeepersteps(ready):
 
     # Move the feet separately while keeping the original armour and mask.
     bounds = ready.get_bounding_rect()
@@ -42,10 +42,13 @@ def original_keeper_steps(ready):
     return frames
 
 
-def draw_frost_fold(screen, camera, position, elapsed, arriving):
+def Drawfrostfold(screen, camera, position, elapsed, arriving):
 
     x, y = camera.apply(*position)
-    tint = (124, 188, 233) if arriving else (190, 224, 246)
+    if arriving:
+        tint = (124, 188, 233)
+    else:
+        tint = (190, 224, 246)
     spread = max(0, min(1, elapsed))
     for ring in range(3):
         radius = max(7, round(16 + 23 * ring + spread * 39))
@@ -62,7 +65,7 @@ def draw_frost_fold(screen, camera, position, elapsed, arriving):
         pg.draw.line(screen, (141, 210, 246), (x + dx, top), (x + dx, top + 14), 2)
 
 
-def boss_pixel_frame(frame):
+def Bosspixelframe(frame):
 
     width, height = frame.get_size()
     opacity = frame.get_alpha()
@@ -72,23 +75,23 @@ def boss_pixel_frame(frame):
     return result
 
 
-def boss_pose_offset(boss):
+def Bossposeoffset(boss):
 
-    if boss.teleport_time > 0:
+    if boss.Teleporttime > 0:
         return 0, 0
     if boss.windup > 0:
-        charge = 1 - boss.windup / boss.windup_length
+        charge = 1 - boss.windup / boss.Winduplength
         return round(-boss.aim.x * charge * 3), round(charge * 2)
-    if boss.attack_animation_time > 0:
-        progress = 1 - boss.attack_animation_time / 0.3
+    if boss.Attackanimationtime > 0:
+        progress = 1 - boss.Attackanimationtime / 0.3
         recoil = math.sin(math.pi * progress)
         return round(boss.aim.x * recoil * 4), round(-recoil * 2)
     if boss.moving:
         return 0, -round(abs(math.sin(boss.walked / 11)) * 2)
-    return 0, -round((1 + math.sin(boss.animation_time * 2.4)) * 1.2)
+    return 0, -round((1 + math.sin(boss.Animationtime * 2.4)) * 1.2)
 
 
-def boss_idle_frames(ready, name):
+def Bossidleframes(ready, name):
 
     # Shift the upper silhouette a few pixels while keeping the lower stance fixed.
     sway, lift = {
@@ -104,8 +107,8 @@ def boss_idle_frames(ready, name):
             weight = max(0, min(1, (bounds.top + bounds.height * .76 - y) / (bounds.height * .46)))
             shift = round(math.sin(phase) * sway * weight)
             rise = round((1 - math.cos(phase)) * lift * weight / 2)
-            source_y = y + rise
-            if source_y >= 0:
-                frame.blit(ready, (4 + shift, 6 + y), (0, source_y, ready.get_width(), 1))
+            Sourcey = y + rise
+            if Sourcey >= 0:
+                frame.blit(ready, (4 + shift, 6 + y), (0, Sourcey, ready.get_width(), 1))
         frames.append(frame)
     return frames

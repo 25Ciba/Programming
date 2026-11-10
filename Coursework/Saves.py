@@ -1,99 +1,150 @@
 from datetime import datetime
-from Menus import DATA, read_data, write_data
+from Menus import DATA, Readdata, Writedata
 from Items import ITEMS, equip
 from Loot import BossDrop
 from Story import REQUIRED
 
 
-def slot_path(slot):
+# Stats for the current run
+
+class RunStats:
+
+    def __init__(self):
+
+        self.score = 0
+        self.coins = 12
+        self.Timesurvived = 0
+        self.level = 1
+        self.experience = 0
+        self.Areascleared = 0
+        self.Enemiesfelled = 0
+        self.Itemscollected = 0
+        self.Damagedealt = 0
+        self.Damagetaken = 0
+        self.Highesthit = 0
+
+
+def Slotpath(slot):
 
     return DATA / f"run-{slot+1}.json"
 
 
 def slots():
 
-    return [read_data(slot_path(i)) for i in range(3)]
+    return [Readdata(Slotpath(i)) for i in range(3)]
 
 
-def slot_labels(saves):
+def Slotlabels(saves):
 
-    return [f"{i+1}. {save.get('class','Unknown')}  |  {save.get('saved_at','')}" if save else f"{i+1}. Empty slot" for i,save in enumerate(saves)]
+    return [f"{i+1}. {save.get('class', 'Unknown')}  |  {save.get('saved_at', '')}" if save else f"{i+1}. Empty slot" for i, save in enumerate(saves)]
 
 
-def enemy_key(enemy):
+def Enemykey(enemy):
 
     return f"{enemy.name}:{enemy.home}"
 
 
-def save_run(slot, player, inventory, game_map, manager, chests, drops, rewarded, stats):
+def Saverun(slot, player, inventory, Gamemap, manager, chests, drops, rewarded, stats):
 
-    village = game_map.settlements
+    village = Gamemap.settlements
+    Savedenemies = {}
+    for enemy in manager.enemies:
+        if enemy.Currenthp <= 0:
+            continue
+        Teleportindex = getattr(enemy, "Teleportindex", 0)
+        Secondphase = getattr(enemy, "Secondphase", False)
+        speed = getattr(enemy, "speed", 0)
+        Savedenemies[Enemykey(enemy)] = [
+            enemy.x, enemy.y, enemy.Currenthp, Teleportindex,
+            Secondphase, enemy.Maxhp, enemy.attack, speed
+        ]
+
     data = {
         "version": 1,
         "saved_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "class": player.clan,
         "character": player.character,
         "fragment": player.fragment,
-        "player": [player.x,player.y,player.current_hp,player.current_mana,player.current_lives,player.facing],
+        "player": [player.x, player.y, player.Currenthp, player.Currentmana, player.Currentlives, player.facing],
         "inventory": inventory,
-        "equipment": [player.main_hand,player.off_hand,player.armour,player.charm],
-        "enemies": {enemy_key(enemy):[enemy.x,enemy.y,enemy.current_hp, getattr(enemy,"teleport_index",0),getattr(enemy,"second_phase",False),enemy.max_hp,enemy.attack,getattr(enemy,"speed",0)] for enemy in manager.enemies if enemy.current_hp>0},
-        "chests": [index for index,chest in enumerate(chests) if chest.is_open],
-        "drops": [[drop.x,drop.y,drop.item] for drop in drops if not drop.is_open],
+        "equipment": [player.Mainhand, player.Offhand, player.armour, player.charm],
+        "enemies": Savedenemies,
+        "chests": [index for index, chest in enumerate(chests) if chest.Isopen],
+        "drops": [[drop.x, drop.y, drop.item] for drop in drops if not drop.Isopen],
         "rewarded": sorted(rewarded),
-        "doors": [[door.allowed,door.cleared] for door in game_map.arena_art.doors],
+        "doors": [[door.allowed, door.cleared] for door in Gamemap.Arenaart.doors],
         "villages": {
-            "loot": list(village.loot_taken),
+            "loot": list(village.Loottaken),
             "levers": sorted(village.levers),
             "sequence": village.sequence,
             "solved": sorted(village.solved),
-            "desk": sorted(village.desk_seals),
-            "orchard": sorted(village.orchard_seals)
+            "desk": sorted(village.Deskseals),
+            "orchard": sorted(village.Orchardseals)
         },
-        "stats": stats
+        "stats": {
+            "score": stats.score,
+            "coins": stats.coins,
+            "time_survived": stats.Timesurvived,
+            "level": stats.level,
+            "experience": stats.experience,
+            "areas_cleared": stats.Areascleared,
+            "enemies_felled": stats.Enemiesfelled,
+            "items_collected": stats.Itemscollected,
+            "damage_dealt": stats.Damagedealt,
+            "damage_taken": stats.Damagetaken,
+            "highest_hit": stats.Highesthit,
+        }
     }
-    write_data(slot_path(slot),data)
+    Writedata(Slotpath(slot), data)
 
 
-def restore_run(data, screen, player, inventory, game_map, manager, chests, drops, rewarded, stats):
+def Restorerun(data, screen, player, inventory, Gamemap, manager, chests, drops, rewarded, stats):
 
-    x,y,hp,mana,lives,facing = data["player"]
-    player.x,player.y,player.facing = x,y,facing
-    player.current_hp = max(1,min(player.max_hp,hp))
-    player.current_mana = max(0,min(player.max_mana,mana))
-    player.current_lives = lives
+    x, y, hp, mana, lives, facing = data["player"]
+    player.x, player.y, player.facing = x, y, facing
+    player.Currenthp = max(1, min(player.Maxhp, hp))
+    player.Currentmana = max(0, min(player.Maxmana, mana))
+    player.Currentlives = lives
     inventory.clear()
     inventory.update(data["inventory"])
     for item in data["equipment"]:
-        if item in ITEMS and inventory.get(item,0)>0:
-            equip(player,item)
+        if item in ITEMS and inventory.get(item, 0)>0:
+            equip(player, item)
     living = data["enemies"]
-    manager.enemies[:] = [enemy for enemy in manager.enemies if enemy_key(enemy) in living]
+    manager.enemies[:] = [enemy for enemy in manager.enemies if Enemykey(enemy) in living]
     for enemy in manager.enemies:
-        stored=living[enemy_key(enemy)]
-        enemy.x,enemy.y,enemy.current_hp,teleport,phase,enemy.max_hp,enemy.attack,enemy.speed=stored
-        if hasattr(enemy,"teleport_index"):
-            enemy.teleport_index,enemy.second_phase=teleport,phase
+        stored=living[Enemykey(enemy)]
+        enemy.x, enemy.y, enemy.Currenthp, teleport, phase, enemy.Maxhp, enemy.attack, enemy.speed=stored
+        if hasattr(enemy, "Teleportindex"):
+            enemy.Teleportindex, enemy.Secondphase=teleport, phase
     for index in data["chests"]:
         if 0<=index<len(chests):
-            chests[index].is_open=True
-    drops.extend(BossDrop(screen,x,y,item) for x,y,item in data["drops"] if item in REQUIRED)
+            chests[index].Isopen=True
+    drops.extend(BossDrop(screen, x, y, item) for x, y, item in data["drops"] if item in REQUIRED)
     rewarded.update(data["rewarded"])
-    for door,(allowed,cleared) in zip(game_map.arena_art.doors,data["doors"]):
-        door.allowed,door.cleared=allowed,cleared
-        if not game_map.can_move_circle(player.x,player.y,player.size):
+    for door, (allowed, cleared) in zip(Gamemap.Arenaart.doors, data["doors"]):
+        door.allowed, door.cleared=allowed, cleared
+        if not Gamemap.Canmovecircle(player.x, player.y, player.size):
             door.progress=1 if allowed or cleared else 0
-    village=game_map.settlements
+    village=Gamemap.settlements
     state=data["villages"]
-    village.loot_taken.update(tuple(item) for item in state["loot"])
+    village.Loottaken.update(tuple(item) for item in state["loot"])
     village.levers.update(state["levers"])
     village.sequence[:]=state["sequence"]
     village.solved.update(state["solved"])
-    village.desk_seals.update(state["desk"])
-    village.orchard_seals.update(state["orchard"])
-    stats.update(data["stats"])
-    if "seconds" in stats:
-        stats["time_survived"] = stats.pop("seconds")
-    stats["areas_cleared"] = len(rewarded)
-    stats.setdefault("level",1)
-    stats.setdefault("experience",0)
+    village.Deskseals.update(state["desk"])
+    village.Orchardseals.update(state["orchard"])
+    Savedstats = data["stats"]
+    stats.score = Savedstats.get("score", stats.score)
+    stats.coins = Savedstats.get("coins", stats.coins)
+    stats.Timesurvived = Savedstats.get("time_survived", stats.Timesurvived)
+    stats.level = Savedstats.get("level", stats.level)
+    stats.experience = Savedstats.get("experience", stats.experience)
+    stats.Enemiesfelled = Savedstats.get("enemies_felled", stats.Enemiesfelled)
+    stats.Itemscollected = Savedstats.get("items_collected", stats.Itemscollected)
+    stats.Damagedealt = Savedstats.get("damage_dealt", stats.Damagedealt)
+    stats.Damagetaken = Savedstats.get("damage_taken", stats.Damagetaken)
+    stats.Highesthit = Savedstats.get("highest_hit", stats.Highesthit)
+    if "seconds" in Savedstats:
+        stats.Timesurvived = Savedstats["seconds"]
+    stats.Areascleared = len(rewarded)

@@ -125,11 +125,11 @@ GATES = [
     (5, 6, 14400, 17920),
 ]
 
-START_X = 10880
-START_Y = 8640
+STARTX = 10880
+STARTY = 8640
 
 # The first arena is for the easier boss. The others are Ultra Boss arenas.
-BOSS_ROOMS = [
+BOSSROOMS = [
     "Overture Arena",
     "Piano Chamber",
     "Resonance Arena",

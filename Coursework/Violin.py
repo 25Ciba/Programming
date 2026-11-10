@@ -2,7 +2,7 @@ import math
 import pygame as pg
 from Guitar import GuitarArt
 
-VIOLIN_HABITATS = [
+VIOLINHABITATS = [
     ("Score Swarm", "Common", 10450, 17130), ("Score Swarm", "Common", 11310, 17130),
     ("Score Swarm", "Common", 10400, 18570), ("Score Swarm", "Common", 11360, 18570),
     ("Score Swarm", "Common", 10560, 15750), ("Score Swarm", "Common", 11200, 15750),
@@ -11,7 +11,7 @@ VIOLIN_HABITATS = [
     ("Bowshade", "Strong", 12880, 18025), ("Bowshade", "Strong", 13260, 18025)
 ]
 
-VIOLIN_NOTES = [
+VIOLINNOTES = [
     (10880, 15630, "Read the tuning ledger", "The same string snapped every night. They stopped replacing it when it began to play on its own."),
     (10880, 17920, "Read the seating plan", "The front seats were kept empty so the violinist could hear the room breathe."),
     (8660, 17920, "Inspect the bow rack", "The spare bows still carry a fine dusting of rosin."),
@@ -19,7 +19,7 @@ VIOLIN_NOTES = [
     (10880, 19690, "Play the waiting violin", "A single note hangs in the hall after you lift the bow.")
 ]
 
-VIOLIN_PAIRS = [
+VIOLINPAIRS = [
     (10880, 15450, 435, 1, 115), (10880, 15940, 460, 2, 88),
     (10880, 17280, 540, 1, 144), (10880, 17470, 350, 2, 86),
     (10880, 17690, 870, 0, 105), (10880, 18045, 1140, 1, 146),
@@ -34,47 +34,47 @@ VIOLIN_PAIRS = [
 
 class ViolinArt(GuitarArt):
 
-    def __init__(self, image_folder, ruins_art):
+    def __init__(self, Imagefolder, Ruinsart):
 
-        folder = image_folder / "ViolinHall"
+        folder = Imagefolder / "ViolinHall"
         tile = pg.image.load(folder / "Flagstones.png").convert()
         self.floors = [("", tile)]
         for name, tint in [("Lantern Court", (229, 197, 201)), ("Tuning Room", (219, 205, 231)), ("West Backstage", (197, 170, 201)), ("East Backstage", (220, 183, 178)), ("Performance Hall", (247, 201, 193))]:
             floor = tile.copy()
             floor.fill(tint, special_flags=pg.BLEND_RGB_MULT)
             self.floors.append((name, floor))
-        self.wall_face = ruins_art.wall_face.copy()
-        self.wall_face.fill((206, 157, 180), special_flags=pg.BLEND_RGB_MULT)
-        pg.draw.rect(self.wall_face, (125, 87, 105), (0, 0, 128, 4))
-        self.wall_banner = ruins_art.wall_banner.copy()
-        self.wall_banner.fill((242, 125, 153), special_flags=pg.BLEND_RGB_MULT)
-        self.wall_sconce = ruins_art.wall_sconce
-        self.lantern_glow = pg.Surface((180, 180), pg.SRCALPHA)
+        self.Wallface = Ruinsart.Wallface.copy()
+        self.Wallface.fill((206, 157, 180), special_flags=pg.BLEND_RGB_MULT)
+        pg.draw.rect(self.Wallface, (125, 87, 105), (0, 0, 128, 4))
+        self.Wallbanner = Ruinsart.Wallbanner.copy()
+        self.Wallbanner.fill((242, 125, 153), special_flags=pg.BLEND_RGB_MULT)
+        self.Wallsconce = Ruinsart.Wallsconce
+        self.Lanternglow = pg.Surface((180, 180), pg.SRCALPHA)
         for radius in range(88, 0, -3):
             alpha = round(65 * (1 - radius / 90) ** 2)
-            pg.draw.circle(self.lantern_glow, (236, 157, 83, alpha), (90, 90), radius)
+            pg.draw.circle(self.Lanternglow, (236, 157, 83, alpha), (90, 90), radius)
         self.sprites = [pg.image.load(folder / f"{name}.png").convert_alpha() for name in ("Violin", "Pillar", "Footlight")]
         self.props = []
         self.bases = []
         self.lanterns = []
-        self.ringing_until = 0
-        self.add_prop(10880, 19535, 0, 126)
-        for center, y, offset, index, width in VIOLIN_PAIRS:
-            self.add_prop(center - offset, y, index, width)
-            self.add_prop(center + offset, y, index, width)
+        self.Ringinguntil = 0
+        self.Addprop(10880, 19535, 0, 126)
+        for center, y, offset, index, width in VIOLINPAIRS:
+            self.Addprop(center - offset, y, index, width)
+            self.Addprop(center + offset, y, index, width)
 
-    def nearby_readable(self, player):
+    def Nearbyreadable(self, player):
 
-        for x, y, label, message in VIOLIN_NOTES:
+        for x, y, label, message in VIOLINNOTES:
             if math.hypot(x - player.x, y - player.y) < 78:
                 return label, message
         return None
 
     def interact(self, player):
 
-        readable = self.nearby_readable(player)
+        readable = self.Nearbyreadable(player)
         if readable and readable[0] == "Play the waiting violin":
-            self.ringing_until = pg.time.get_ticks() + 1900
+            self.Ringinguntil = pg.time.get_ticks() + 1900
         return readable
 
     def render(self, screen, camera):
@@ -95,13 +95,13 @@ class ViolinArt(GuitarArt):
         for x, y in self.lanterns:
             px, py = camera.apply(x, y)
             if view.colliderect((px - 90, py - 90, 180, 180)):
-                screen.blit(self.lantern_glow, (px - 90, py - 90))
-        for x, y, label, message in VIOLIN_NOTES:
+                screen.blit(self.Lanternglow, (px - 90, py - 90))
+        for x, y, label, message in VIOLINNOTES:
             px, py = camera.apply(x, y)
             pg.draw.polygon(screen, (57, 40, 52), [(px - 13, py - 6), (px + 11, py - 9), (px + 15, py + 4), (px - 9, py + 8)])
             pg.draw.line(screen, (192, 150, 119), (px - 8, py - 4), (px + 9, py - 6), 2)
         now = pg.time.get_ticks()
-        if self.ringing_until > now:
+        if self.Ringinguntil > now:
             px, py = camera.apply(10880, 19535)
             for i in range(3):
                 radius = 24 + ((now // 18 + i * 22) % 65)

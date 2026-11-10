@@ -2,10 +2,10 @@ import math
 import pygame as pg
 from Guitar import GuitarArt
 
-CELLO_ARENA_X = 3840
-CELLO_ARENA_Y = 20160
+CELLOARENAX = 3840
+CELLOARENAY = 20160
 
-CELLO_HABITATS = [
+CELLOHABITATS = [
     ("Silt Scorpion", "Common", 3430, 17470), ("Silt Scorpion", "Common", 4250, 17470),
     ("Rosin Spirit", "Strong", 3260, 17910), ("Rosin Spirit", "Strong", 4420, 17910),
     ("Silt Scorpion", "Common", 3420, 18410), ("Silt Scorpion", "Common", 4260, 18410),
@@ -15,7 +15,7 @@ CELLO_HABITATS = [
     ("Silt Scorpion", "Common", 5845, 18080), ("Silt Scorpion", "Common", 6315, 18080)
 ]
 
-CELLO_NOTES = [
+CELLONOTES = [
     (3840, 17920, "Read the silt marker", "Sand buried the seats first. The last chair was still facing the stage."),
     (3840, 15680, "Inspect the bow case", "The hair has gone slack. Someone wrapped the handle to stop it slipping."),
     (1600, 17920, "Read the crypt inscription", "Play for those who left before the final movement."),
@@ -24,7 +24,7 @@ CELLO_NOTES = [
     (3840, 17610, "Listen at the brazier", "The brazier hums at a low pitch whenever sand shifts beneath the court.")
 ]
 
-CELLO_PAIRS = [
+CELLOPAIRS = [
     (3840, 15400, 435, 1, 114), (3840, 15920, 435, 2, 80),
     (3840, 17160, 730, 1, 138), (3840, 17440, 555, 2, 82),
     (3840, 17780, 710, 1, 136), (3840, 18190, 710, 1, 136),
@@ -38,9 +38,9 @@ CELLO_PAIRS = [
 
 class CelloArt(GuitarArt):
 
-    def __init__(self, image_folder, ruins_art):
+    def __init__(self, Imagefolder, Ruinsart):
 
-        folder = image_folder / "CelloCatacombs"
+        folder = Imagefolder / "CelloCatacombs"
         tile = pg.transform.scale(pg.image.load(folder / "Flagstones.png").convert(), (256, 256))
         self.floors = [("", tile)]
         for name, tint in [
@@ -51,53 +51,53 @@ class CelloArt(GuitarArt):
             floor = tile.copy()
             floor.fill(tint, special_flags=pg.BLEND_RGB_MULT)
             self.floors.append((name, floor))
-        self.wall_face = ruins_art.wall_face.copy()
-        self.wall_face.fill((100, 69, 58), special_flags=pg.BLEND_RGB_ADD)
-        self.wall_face.fill((211, 176, 146), special_flags=pg.BLEND_RGB_MULT)
-        pg.draw.rect(self.wall_face, (154, 118, 90), (0, 0, 128, 4))
-        self.wall_banner = ruins_art.wall_banner.copy()
-        self.wall_banner.fill((237, 156, 134), special_flags=pg.BLEND_RGB_MULT)
-        self.wall_sconce = ruins_art.wall_sconce
-        self.lantern_glow = pg.Surface((180, 180), pg.SRCALPHA)
+        self.Wallface = Ruinsart.Wallface.copy()
+        self.Wallface.fill((100, 69, 58), special_flags=pg.BLEND_RGB_ADD)
+        self.Wallface.fill((211, 176, 146), special_flags=pg.BLEND_RGB_MULT)
+        pg.draw.rect(self.Wallface, (154, 118, 90), (0, 0, 128, 4))
+        self.Wallbanner = Ruinsart.Wallbanner.copy()
+        self.Wallbanner.fill((237, 156, 134), special_flags=pg.BLEND_RGB_MULT)
+        self.Wallsconce = Ruinsart.Wallsconce
+        self.Lanternglow = pg.Surface((180, 180), pg.SRCALPHA)
         for radius in range(88, 0, -3):
             alpha = round(38 * (1 - radius / 90) ** 2)
-            pg.draw.circle(self.lantern_glow, (220, 137, 77, alpha), (90, 90), radius)
+            pg.draw.circle(self.Lanternglow, (220, 137, 77, alpha), (90, 90), radius)
         self.sprites = [pg.image.load(folder / f"{name}.png").convert_alpha() for name in ("Cello", "Column", "Brazier")]
         self.props = []
         self.bases = []
         self.lanterns = []
-        self.ringing_until = 0
+        self.Ringinguntil = 0
         self.populate()
 
     def populate(self):
 
-        self.add_prop(3840, 19635, 0, 156)
-        self.add_prop(3840, 17750, 2, 108)
-        for center, y, offset, index, width in CELLO_PAIRS:
-            self.add_prop(center - offset, y, index, width)
-            self.add_prop(center + offset, y, index, width)
+        self.Addprop(3840, 19635, 0, 156)
+        self.Addprop(3840, 17750, 2, 108)
+        for center, y, offset, index, width in CELLOPAIRS:
+            self.Addprop(center - offset, y, index, width)
+            self.Addprop(center + offset, y, index, width)
 
-    def nearby_readable(self, player):
+    def Nearbyreadable(self, player):
 
-        for x, y, label, message in CELLO_NOTES:
+        for x, y, label, message in CELLONOTES:
             if abs(player.x - x) < 135 and abs(player.y - y) < 100:
                 return label, message
         return None
 
     def interact(self, player):
 
-        readable = self.nearby_readable(player)
+        readable = self.Nearbyreadable(player)
         if readable and readable[0] in ("Listen at the brazier", "Draw the cello bow"):
-            self.ringing_until = pg.time.get_ticks() + 2600
+            self.Ringinguntil = pg.time.get_ticks() + 2600
         return readable
 
     def render(self, screen, camera):
 
         view = screen.get_rect()
-        region_x, region_y = camera.apply(750, 15000)
-        if not view.colliderect((region_x, region_y, 6400, 6500)):
+        Regionx, Regiony = camera.apply(750, 15000)
+        if not view.colliderect((Regionx, Regiony, 6400, 6500)):
             return
-        x, y = camera.apply(CELLO_ARENA_X, CELLO_ARENA_Y)
+        x, y = camera.apply(CELLOARENAX, CELLOARENAY)
         if view.colliderect((x - 475, y - 360, 950, 720)):
             for i in range(4):
                 pg.draw.ellipse(screen, (130, 91, 76), (x - 448 + 11 * i, y - 305 + 11 * i, 896 - 22 * i, 610 - 22 * i), 2)
@@ -111,13 +111,13 @@ class CelloArt(GuitarArt):
         for x, y in self.lanterns:
             px, py = camera.apply(x, y)
             if view.colliderect((px - 90, py - 90, 180, 180)):
-                screen.blit(self.lantern_glow, (px - 90, py - 90))
+                screen.blit(self.Lanternglow, (px - 90, py - 90))
         for y in range(17030, 18850, 54):
             for x in (3560, 4120):
                 px, py = camera.apply(x, y)
                 pg.draw.line(screen, (124, 97, 83), (px - 16, py), (px + 16, py), 2)
                 pg.draw.rect(screen, (148, 112, 92), (px - 2, py - 3, 4, 6))
-        for x, y, label, message in CELLO_NOTES:
+        for x, y, label, message in CELLONOTES:
             px, py = camera.apply(x, y)
             pg.draw.polygon(screen, (91, 65, 60), [(px - 13, py - 6), (px + 11, py - 9), (px + 15, py + 4), (px - 9, py + 8)])
             pg.draw.line(screen, (183, 143, 107), (px - 8, py - 4), (px + 9, py - 6), 2)
@@ -127,7 +127,7 @@ class CelloArt(GuitarArt):
             y = 17440 + (i * 73) % 920
             px, py = camera.apply(x, y)
             pg.draw.rect(screen, (164, 126, 94), (px, py, 3, 1))
-        if self.ringing_until > now:
+        if self.Ringinguntil > now:
             for x, y in [(3840, 17750), (3840, 19635)]:
                 px, py = camera.apply(x, y)
                 for i in range(7):

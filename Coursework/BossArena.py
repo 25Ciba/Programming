@@ -3,7 +3,7 @@ import pygame as pg
 from Ruins import RuinsProp
 
 # Arena name, passage centre, and door orientation.
-ARENA_DOORS = [
+ARENADOORS = [
     ("Overture Arena", 12245, 10880, True, 1),
     ("Overture Arena", 14390, 10880, True, -1),
     ("Piano Chamber", 10880, 2780, False, -1),
@@ -26,7 +26,7 @@ PALETTES = [
     ("Performance Hall", (85, 46, 71), (218, 162, 130))
 ]
 
-DOOR_STORIES = [
+DOORSTORIES = [
     ("Overture Arena", "Overture Keeper", "Forkblade", "The Keeper has heard your footsteps. It is waiting for the downbeat.", "I counted three blows. On the fourth beat the Keeper went still. I wish I had known the silence was my turn."),
     ("Piano Chamber", "Piano Ultra Boss", "Ivory Sword", "The pianist saved the last note for whoever opens this door.", "The last key fell silent, but its note was still moving through the room. I stepped back into it."),
     ("Resonance Arena", "Guitar Ultra Boss", "Fretblade", "Six strings are humming beyond the door. The last challenger only heard five.", "He laid his palm across the strings. I mistook the silence for surrender. My blade is still where it fell."),
@@ -59,7 +59,7 @@ PARTITIONS = [
 ]
 
 
-ALCOVE_RETURNS = [
+ALCOVERETURNS = [
     (10880, 11710, 690, 58, 188),
     (10880, 10210, 805, 58, 160),
     (8640, 11355, 466, 58, 142),
@@ -88,58 +88,64 @@ class ArenaDoor:
         self.inside = inside
         self.allowed = False
         self.cleared = False
-        for arena, boss_name, relic_name, challenge, inscription in DOOR_STORIES:
+        for arena, Bossname, Relicname, challenge, inscription in DOORSTORIES:
             if arena == name:
-                self.boss_name = boss_name
-                self.relic_name = relic_name
+                self.Bossname = Bossname
+                self.Relicname = Relicname
                 self.challenge = challenge
                 self.inscription = inscription
-        sprite = pg.image.load(folder / f"{self.relic_name}.png").convert_alpha()
+        sprite = pg.image.load(folder / f"{self.Relicname}.png").convert_alpha()
         width = round(sprite.get_width() * 84 / sprite.get_height())
         sprite = pg.transform.scale(sprite, (width, 84))
-        relic_x = x - 166 * inside if vertical else x + 125
-        relic_y = y + 125 if vertical else y - 166 * inside
-        self.relic = RuinsProp(relic_x, relic_y, 24, sprite)
-        self.note_x = relic_x - 29
-        self.note_y = relic_y + 27
-        self.half_opening = 216
+        if vertical:
+            Relicx = x - 166 * inside
+        else:
+            Relicx = x + 125
+        if vertical:
+            Relicy = y + 125
+        else:
+            Relicy = y - 166 * inside
+        self.relic = RuinsProp(Relicx, Relicy, 24, sprite)
+        self.Notex = Relicx - 29
+        self.Notey = Relicy + 27
+        self.Halfopening = 216
         self.progress = 0
         self.hold = 0
         for arena, stone, metal in PALETTES:
             if arena == name:
                 self.stone = stone
                 self.metal = metal
-        self.panel = pg.Surface((self.half_opening, 60), pg.SRCALPHA)
+        self.panel = pg.Surface((self.Halfopening, 60), pg.SRCALPHA)
         self.panel.fill((29, 30, 46))
-        pg.draw.rect(self.panel, self.stone, (0, 6, self.half_opening, 47))
-        for x_line in range(10, self.half_opening - 2, 14):
-            pg.draw.rect(self.panel, (37, 39, 54), (x_line, 12, 7, 35))
-            pg.draw.rect(self.panel, self.metal, (x_line, 16, 3, 25))
-        pg.draw.rect(self.panel, self.metal, (0, 5, self.half_opening, 4))
-        pg.draw.rect(self.panel, self.metal, (0, 48, self.half_opening, 4))
+        pg.draw.rect(self.panel, self.stone, (0, 6, self.Halfopening, 47))
+        for Xline in range(10, self.Halfopening - 2, 14):
+            pg.draw.rect(self.panel, (37, 39, 54), (Xline, 12, 7, 35))
+            pg.draw.rect(self.panel, self.metal, (Xline, 16, 3, 25))
+        pg.draw.rect(self.panel, self.metal, (0, 5, self.Halfopening, 4))
+        pg.draw.rect(self.panel, self.metal, (0, 48, self.Halfopening, 4))
         if name == "Piano Chamber":
-            for x_line in range(6, self.half_opening - 5, 16):
-                pg.draw.rect(self.panel, (220, 228, 226), (x_line, 31, 11, 16))
-                pg.draw.rect(self.panel, (27, 38, 57), (x_line + 6, 29, 6, 10))
+            for Xline in range(6, self.Halfopening - 5, 16):
+                pg.draw.rect(self.panel, (220, 228, 226), (Xline, 31, 11, 16))
+                pg.draw.rect(self.panel, (27, 38, 57), (Xline + 6, 29, 6, 10))
         elif name == "Resonance Arena":
-            for y_line in range(18, 43, 5):
-                pg.draw.line(self.panel, self.metal, (4, y_line), (self.half_opening - 5, y_line), 2)
+            for Yline in range(18, 43, 5):
+                pg.draw.line(self.panel, self.metal, (4, Yline), (self.Halfopening - 5, Yline), 2)
         elif name == "Performance Hall":
             pg.draw.lines(self.panel, self.metal, False, [(86, 13), (76, 23), (83, 30), (76, 39), (91, 46), (106, 39), (99, 30), (106, 23), (96, 13)], 3)
             for string in (88, 92, 96):
                 pg.draw.line(self.panel, (230, 177, 153), (string, 15), (string, 40), 1)
         elif name == "Harp Chamber":
-            for x_line in range(76, 144, 12):
-                pg.draw.line(self.panel, self.metal, (x_line, 13), (x_line, 45), 2)
+            for Xline in range(76, 144, 12):
+                pg.draw.line(self.panel, self.metal, (Xline, 13), (Xline, 45), 2)
             pg.draw.arc(self.panel, self.metal, (64, 6, 92, 48), math.pi, math.tau, 4)
         elif name == "Cello Amphitheatre":
-            for y_line in (21, 26, 31, 36):
-                pg.draw.line(self.panel, self.metal, (11, y_line), (self.half_opening - 11, y_line), 2)
+            for Yline in (21, 26, 31, 36):
+                pg.draw.line(self.panel, self.metal, (11, Yline), (self.Halfopening - 11, Yline), 2)
             pg.draw.arc(self.panel, (232, 184, 123), (70, 12, 76, 37), 0.15, 3.0, 4)
         elif name == "Flute Hall":
-            pg.draw.line(self.panel, self.metal, (18, 29), (self.half_opening - 18, 29), 5)
-            for x_line in range(32, self.half_opening - 20, 21):
-                pg.draw.circle(self.panel, (35, 47, 61), (x_line, 29), 3)
+            pg.draw.line(self.panel, self.metal, (18, 29), (self.Halfopening - 18, 29), 5)
+            for Xline in range(32, self.Halfopening - 20, 21):
+                pg.draw.circle(self.panel, (35, 47, 61), (Xline, 29), 3)
         else:
             pg.draw.lines(self.panel, self.metal, False, [(63, 16), (63, 30), (78, 36), (93, 30), (93, 16)], 3)
             pg.draw.line(self.panel, self.metal, (78, 34), (78, 44), 3)
@@ -160,16 +166,16 @@ class ArenaDoor:
         else:
             self.progress = max(0, self.progress - dt * 2.1)
 
-    def wants_confirmation(self, player):
+    def Wantsconfirmation(self, player):
 
         along, across = self.relative(player.x, player.y)
         return -220 < along * self.inside <= 0 and abs(across) < 190 and not self.allowed and not self.cleared
 
-    def relic_near(self, player):
+    def Relicnear(self, player):
 
-        return math.hypot(self.note_x - player.x, self.note_y - player.y) < 90
+        return math.hypot(self.Notex - player.x, self.Notey - player.y) < 90
 
-    def allows_crossing(self, player, x, y):
+    def Allowscrossing(self, player, x, y):
 
         start, _ = self.relative(player.x, player.y)
         end, across = self.relative(x, y)
@@ -189,11 +195,11 @@ class ArenaDoor:
         if abs(along) > 14 + radius or abs(across) >= 290 + radius:
             return False
         # The frame fills the corridor. The panels retract into its sides.
-        return abs(across) + radius >= self.half_opening * self.progress
+        return abs(across) + radius >= self.Halfopening * self.progress
 
-    def render_note(self, screen, camera):
+    def Rendernote(self, screen, camera):
 
-        x, y = camera.apply(self.note_x, self.note_y)
+        x, y = camera.apply(self.Notex, self.Notey)
         pg.draw.ellipse(screen, (24, 25, 38), (x - 11, y - 2, 25, 13))
         pg.draw.polygon(screen, (205, 171, 126), [(x - 10, y - 7), (x + 9, y - 9), (x + 13, y + 4), (x - 7, y + 8)])
         for offset in (-4, 0, 4):
@@ -205,19 +211,19 @@ class ArenaDoor:
         if not screen.get_rect().inflate(620, 620).collidepoint(x, y):
             return
         door = pg.Surface((576, 68), pg.SRCALPHA)
-        left_edge = 288 - self.half_opening
-        right_edge = 288 + self.half_opening
-        for side in (0, right_edge):
-            pg.draw.rect(door, (27, 27, 41), (side, 4, left_edge, 60))
-            for offset in range(4, left_edge - 18, 26):
+        Leftedge = 288 - self.Halfopening
+        Rightedge = 288 + self.Halfopening
+        for side in (0, Rightedge):
+            pg.draw.rect(door, (27, 27, 41), (side, 4, Leftedge, 60))
+            for offset in range(4, Leftedge - 18, 26):
                 pg.draw.rect(door, self.stone, (side + offset, 10, 22, 45))
                 pg.draw.rect(door, (122, 116, 128), (side + offset, 10, 21, 4))
-        amount = round(self.half_opening * (1 - self.progress))
+        amount = round(self.Halfopening * (1 - self.progress))
         if amount:
-            door.blit(self.panel, (left_edge, 4), (self.half_opening - amount, 0, amount, 60))
+            door.blit(self.panel, (Leftedge, 4), (self.Halfopening - amount, 0, amount, 60))
             right = pg.transform.flip(self.panel, True, False)
-            door.blit(right, (right_edge - amount, 4), (0, 0, amount, 60))
-        for post in (left_edge, right_edge):
+            door.blit(right, (Rightedge - amount, 4), (0, 0, amount, 60))
+        for post in (Leftedge, Rightedge):
             pg.draw.rect(door, (23, 25, 39), (post - 11, 1, 22, 65))
             pg.draw.rect(door, self.stone, (post - 8, 4, 16, 56))
             pg.draw.rect(door, self.metal, (post - 5, 9, 10, 11))
@@ -229,19 +235,19 @@ class ArenaDoor:
 
 class ArenaArt:
 
-    def __init__(self, rooms, image_folder):
+    def __init__(self, rooms, Imagefolder):
 
-        folder = image_folder / "ArenaRelics"
-        self.doors = [ArenaDoor(name, x, y, vertical, inside, folder) for name, x, y, vertical, inside in ARENA_DOORS]
+        folder = Imagefolder / "ArenaRelics"
+        self.doors = [ArenaDoor(name, x, y, vertical, inside, folder) for name, x, y, vertical, inside in ARENADOORS]
         self.relics = [door.relic for door in self.doors]
         self.rooms = [(name, rect) for name, region, rect in rooms if any(name == arena for arena, _, _ in PALETTES)]
         self.partitions = []
-        for x, y, offset_x, offset_y, width, height in PARTITIONS:
+        for x, y, Offsetx, Offsety, width, height in PARTITIONS:
             for side in (-1, 1):
                 rect = pg.Rect(0, 0, width, height)
-                rect.center = (x + side * offset_x, y + offset_y)
+                rect.center = (x + side * Offsetx, y + Offsety)
                 self.partitions.append(rect)
-        for x, y, offset, width, height in ALCOVE_RETURNS:
+        for x, y, offset, width, height in ALCOVERETURNS:
             for side in (-1, 1):
                 rect = pg.Rect(0, 0, width, height)
                 rect.center = (x + side * offset, y)
@@ -253,37 +259,37 @@ class ArenaArt:
                 strength = round(45 * (1 - radius / 220) ** 1.4)
                 pg.draw.ellipse(light, (*metal, strength), (300 - radius * 1.35, 220 - radius, radius * 2.7, radius * 2))
             self.lights.append(light)
-        self.fog_mask = None
-        self.revealed_room = None
+        self.Fogmask = None
+        self.Revealedroom = None
         self.reveal = 0
 
     def update(self, dt, player, enemies=None):
 
         for door in self.doors:
             if enemies is not None:
-                door.cleared = not any(enemy.name == door.boss_name and enemy.current_hp > 0 for enemy in enemies)
+                door.cleared = not any(enemy.name == door.Bossname and enemy.Currenthp > 0 for enemy in enemies)
             door.update(dt, player)
         for name, rect in self.rooms:
             if rect.inflate(100, 100).collidepoint(player.x, player.y):
-                self.revealed_room = name
+                self.Revealedroom = name
                 self.reveal = min(1, self.reveal + dt * 2)
                 return
         self.reveal = max(0, self.reveal - dt * 2)
 
-    def nearby_action(self, player):
+    def Nearbyaction(self, player):
 
         for door in self.doors:
-            if door.relic_near(player):
+            if door.Relicnear(player):
                 return door, False
         for door in self.doors:
-            if door.wants_confirmation(player):
+            if door.Wantsconfirmation(player):
                 return door, True
         return None
 
-    def allows_crossing(self, player, x, y):
+    def Allowscrossing(self, player, x, y):
 
         for door in self.doors:
-            if not door.allows_crossing(player, x, y):
+            if not door.Allowscrossing(player, x, y):
                 return False
         return True
 
@@ -297,22 +303,22 @@ class ArenaArt:
                 return True
         return False
 
-    def reveal_fog(self, fog, camera, room_floors):
+    def Revealfog(self, fog, camera, Roomfloors):
 
         if self.reveal <= 0:
             return
         opacity = round(240 * (1 - self.reveal))
         # Reveal only the arena's actual floor shape, not the neighbouring tunnels.
-        if self.fog_mask is None or self.fog_mask.get_size() != fog.get_size():
-            self.fog_mask = pg.Surface(fog.get_size(), pg.SRCALPHA)
-        mask = self.fog_mask
+        if self.Fogmask is None or self.Fogmask.get_size() != fog.get_size():
+            self.Fogmask = pg.Surface(fog.get_size(), pg.SRCALPHA)
+        mask = self.Fogmask
         mask.fill((255, 255, 255, 255))
-        for name, region, rect in room_floors:
-            if name == self.revealed_room:
+        for name, region, rect in Roomfloors:
+            if name == self.Revealedroom:
                 pg.draw.rect(mask, (255, 255, 255, opacity), pg.Rect(camera.apply(rect.x, rect.y), rect.size))
         fog.blit(mask, (0, 0), special_flags=pg.BLEND_RGBA_MIN)
 
-    def hide_beyond_doors(self, fog, camera, player):
+    def Hidebeyonddoors(self, fog, camera, player):
 
         view = fog.get_rect()
         for door in self.doors:
@@ -371,4 +377,4 @@ class ArenaArt:
                 pg.draw.rect(screen, color, (px, py, 2, 2))
         for door in self.doors:
             door.render(screen, camera)
-            door.render_note(screen, camera)
+            door.Rendernote(screen, camera)

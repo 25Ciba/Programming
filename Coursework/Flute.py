@@ -2,10 +2,10 @@ import math
 import pygame as pg
 from Guitar import GuitarArt
 
-FLUTE_ARENA_X = 20480
-FLUTE_ARENA_Y = 10880
+FLUTEARENAX = 20480
+FLUTEARENAY = 10880
 
-FLUTE_HABITATS = [
+FLUTEHABITATS = [
     ("Chalk Skitter", "Common", 17520, 10645), ("Chalk Skitter", "Common", 18320, 10645),
     ("Reed Wisp", "Strong", 17200, 10920), ("Reed Wisp", "Strong", 18640, 10920),
     ("Chalk Skitter", "Common", 17500, 11370), ("Chalk Skitter", "Common", 18340, 11370),
@@ -15,7 +15,7 @@ FLUTE_HABITATS = [
     ("Chalk Skitter", "Common", 15460, 10730), ("Chalk Skitter", "Common", 15900, 10730)
 ]
 
-FLUTE_NOTES = [
+FLUTENOTES = [
     (15680, 10930, "Read the waystone", "Follow the breeze through the cloister. The doors here were built to let it pass."),
     (17920, 11110, "Ring the cloister chimes", "The wind carries a thin answer from the recital hall."),
     (17920, 8640, "Read the breath exercise", "Hold one note until the chimes go quiet. Begin again on the next breath."),
@@ -23,7 +23,7 @@ FLUTE_NOTES = [
     (20480, 10120, "Play the silver flute", "One clear note travels the length of the hall. Nothing echoes back.")
 ]
 
-FLUTE_PAIRS = [
+FLUTEPAIRS = [
     # West entrance vestry.
     (15680, 10620, 390, 1, 102), (15680, 11140, 390, 2, 80),
     # Main cloister, with a wide central promenade.
@@ -42,9 +42,9 @@ FLUTE_PAIRS = [
 
 class FluteArt(GuitarArt):
 
-    def __init__(self, image_folder, ruins_art):
+    def __init__(self, Imagefolder, Ruinsart):
 
-        folder = image_folder / "FluteCloister"
+        folder = Imagefolder / "FluteCloister"
         tile = pg.transform.scale(pg.image.load(folder / "Flagstones.png").convert(), (256, 256))
         self.floors = [("", tile)]
         for name, tint in [
@@ -55,53 +55,53 @@ class FluteArt(GuitarArt):
             floor = tile.copy()
             floor.fill(tint, special_flags=pg.BLEND_RGB_MULT)
             self.floors.append((name, floor))
-        self.wall_face = ruins_art.wall_face.copy()
-        self.wall_face.fill((177, 196, 185), special_flags=pg.BLEND_RGB_ADD)
-        self.wall_face.fill((157, 165, 171), special_flags=pg.BLEND_RGB_MULT)
-        pg.draw.rect(self.wall_face, (139, 151, 151), (0, 0, 128, 4))
-        self.wall_banner = ruins_art.wall_banner.copy()
-        self.wall_banner.fill((157, 221, 207), special_flags=pg.BLEND_RGB_MULT)
-        self.wall_sconce = ruins_art.wall_sconce
-        self.lantern_glow = pg.Surface((180, 180), pg.SRCALPHA)
+        self.Wallface = Ruinsart.Wallface.copy()
+        self.Wallface.fill((177, 196, 185), special_flags=pg.BLEND_RGB_ADD)
+        self.Wallface.fill((157, 165, 171), special_flags=pg.BLEND_RGB_MULT)
+        pg.draw.rect(self.Wallface, (139, 151, 151), (0, 0, 128, 4))
+        self.Wallbanner = Ruinsart.Wallbanner.copy()
+        self.Wallbanner.fill((157, 221, 207), special_flags=pg.BLEND_RGB_MULT)
+        self.Wallsconce = Ruinsart.Wallsconce
+        self.Lanternglow = pg.Surface((180, 180), pg.SRCALPHA)
         for radius in range(88, 0, -3):
             alpha = round(38 * (1 - radius / 90) ** 2)
-            pg.draw.circle(self.lantern_glow, (139, 190, 174, alpha), (90, 90), radius)
+            pg.draw.circle(self.Lanternglow, (139, 190, 174, alpha), (90, 90), radius)
         self.sprites = [pg.image.load(folder / f"{name}.png").convert_alpha() for name in ("Lectern", "Column", "Chimes")]
         self.props = []
         self.bases = []
         self.lanterns = []
-        self.ringing_until = 0
+        self.Ringinguntil = 0
         self.populate()
 
     def populate(self):
 
-        self.add_prop(20480, 10015, 0, 175)
-        self.add_prop(17920, 10990, 2, 116)
-        for center, y, offset, index, width in FLUTE_PAIRS:
-            self.add_prop(center - offset, y, index, width)
-            self.add_prop(center + offset, y, index, width)
+        self.Addprop(20480, 10015, 0, 175)
+        self.Addprop(17920, 10990, 2, 116)
+        for center, y, offset, index, width in FLUTEPAIRS:
+            self.Addprop(center - offset, y, index, width)
+            self.Addprop(center + offset, y, index, width)
 
-    def nearby_readable(self, player):
+    def Nearbyreadable(self, player):
 
-        for x, y, label, message in FLUTE_NOTES:
+        for x, y, label, message in FLUTENOTES:
             if abs(player.x - x) < 135 and abs(player.y - y) < 100:
                 return label, message
         return None
 
     def interact(self, player):
 
-        readable = self.nearby_readable(player)
+        readable = self.Nearbyreadable(player)
         if readable and readable[0] in ("Ring the cloister chimes", "Play the silver flute"):
-            self.ringing_until = pg.time.get_ticks() + 2600
+            self.Ringinguntil = pg.time.get_ticks() + 2600
         return readable
 
     def render(self, screen, camera):
 
         view = screen.get_rect()
-        region_x, region_y = camera.apply(14900, 7800)
-        if not view.colliderect((region_x, region_y, 6400, 6250)):
+        Regionx, Regiony = camera.apply(14900, 7800)
+        if not view.colliderect((Regionx, Regiony, 6400, 6250)):
             return
-        x, y = camera.apply(FLUTE_ARENA_X, FLUTE_ARENA_Y)
+        x, y = camera.apply(FLUTEARENAX, FLUTEARENAY)
         if view.colliderect((x - 475, y - 360, 950, 720)):
             for i in range(4):
                 pg.draw.ellipse(screen, (89, 114, 115), (x - 448 + 11 * i, y - 305 + 11 * i, 896 - 22 * i, 610 - 22 * i), 2)
@@ -115,13 +115,13 @@ class FluteArt(GuitarArt):
         for x, y in self.lanterns:
             px, py = camera.apply(x, y)
             if view.colliderect((px - 90, py - 90, 180, 180)):
-                screen.blit(self.lantern_glow, (px - 90, py - 90))
+                screen.blit(self.Lanternglow, (px - 90, py - 90))
         for y in range(10180, 11600, 46):
             for x in (17650, 18190):
                 px, py = camera.apply(x, y)
                 pg.draw.line(screen, (104, 121, 117), (px - 16, py), (px + 16, py), 2)
                 pg.draw.rect(screen, (120, 133, 128), (px - 2, py - 3, 4, 6))
-        for x, y, label, message in FLUTE_NOTES:
+        for x, y, label, message in FLUTENOTES:
             px, py = camera.apply(x, y)
             pg.draw.polygon(screen, (81, 90, 104), [(px - 13, py - 6), (px + 11, py - 9), (px + 15, py + 4), (px - 9, py + 8)])
             pg.draw.line(screen, (162, 181, 174), (px - 8, py - 4), (px + 9, py - 6), 2)
@@ -131,7 +131,7 @@ class FluteArt(GuitarArt):
             y = 10440 + (i * 73) % 860
             px, py = camera.apply(x, y)
             pg.draw.rect(screen, (119, 145, 143), (px, py, 3, 1))
-        if self.ringing_until > now:
+        if self.Ringinguntil > now:
             for x, y in [(17920, 10990), (20480, 10015)]:
                 px, py = camera.apply(x, y)
                 for i in range(7):
