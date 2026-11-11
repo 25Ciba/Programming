@@ -21,9 +21,9 @@ camera = Camera(screen, MAP_WIDTH, MAP_HEIGHT)
 message = "WASD / arrow keys: move | left click: attack | right click: block | space: dash | M: map"
 message_timer = 6.0
 
-# Make the mist once. The clear part follows the player.
+
 vision = player.pvisionRadius()
-fog_radius = vision + 150
+fog_radius = vision
 mist = pg.Surface((fog_radius * 2, fog_radius * 2), pg.SRCALPHA)
 mist.fill((11, 14, 24, 240))
 for radius in range(fog_radius, vision - 1, -1):
