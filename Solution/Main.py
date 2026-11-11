@@ -18,12 +18,12 @@ game_map = Map()
 player = Player(screen)
 enemy_manager = EnemyManager(screen, player, game_map)
 camera = Camera(screen, MAP_WIDTH, MAP_HEIGHT)
-message = "WASD / arrow keys: move | left click: attack | right click: block | space: dash | M: map"
+message = "WASD / arrow keys: move | left click: attack | right click: block | space: dash | E: read | M: map"
 message_timer = 6.0
 
-
+# Make the mist once. The clear part follows the player.
 vision = player.pvisionRadius()
-fog_radius = vision
+fog_radius = vision + 150
 mist = pg.Surface((fog_radius * 2, fog_radius * 2), pg.SRCALPHA)
 mist.fill((11, 14, 24, 240))
 for radius in range(fog_radius, vision - 1, -1):
@@ -43,6 +43,11 @@ while running:
                 running = False
             elif event.key == pg.K_m:
                 show_map = not show_map
+            elif event.key == pg.K_e and not show_map:
+                readable = game_map.ruins_art.nearby_readable(player)
+                if readable:
+                    message = readable[1]
+                    message_timer = 6.0
             elif event.key == pg.K_SPACE and not show_map:
                 if player.begin_dash():
                     message = "Dash!"
@@ -58,6 +63,7 @@ while running:
     # Update the game objects
     if not show_map:
         player.update(dt)
+        game_map.gate.update(dt, player)
         player.keybinds(dt, game_map)
         enemy_manager.update(dt)
         camera.update(player)
@@ -104,6 +110,11 @@ while running:
 
     screen.blit(small_font.render(f"Block: {block_cooldown}", True, (210, 225, 242)), (24, 121))
     screen.blit(small_font.render(f"Dash: {dash_cooldown}", True, (210, 225, 242)), (145, 121))
+
+    readable = game_map.ruins_art.nearby_readable(player)
+    if message_timer <= 0 and readable:
+        prompt = small_font.render(f"E   {readable[0]}", True, (241, 213, 157))
+        screen.blit(prompt, prompt.get_rect(midbottom=(WIDTH // 2, HEIGHT - 18)))
 
     if message_timer > 0:
         message_text = small_font.render(message, True, (235, 242, 250))

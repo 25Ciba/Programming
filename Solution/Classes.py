@@ -2,6 +2,7 @@ import pygame as pg
 import random
 import math
 from pathlib import Path
+from Ruins import RuinsArt, RuinsGate, GATE_X, GATE_Y
 from DungeonLayout import REGIONS, ROOMS, CORRIDORS, GATES, BOSS_ROOMS, START_X, START_Y
 
 ###
@@ -55,6 +56,8 @@ class Map:
 
     def __init__(self):
 
+        self.gate = RuinsGate()
+        self.ruins_art = RuinsArt(IMAGE_FOLDER)
         self.rooms = []
         self.room_floors = []
         self.corridors = []
@@ -124,6 +127,8 @@ class Map:
 
     def can_move_circle(self, x, y, radius):
 
+        if self.gate.blocks(x, y, radius) or self.ruins_art.blocks(x, y, radius):
+            return False
         points = [(x - radius, y), (x + radius, y), (x, y - radius), (x, y + radius)]
         for point_x, point_y in points:
             if not self.is_walkable(point_x, point_y):
@@ -151,6 +156,7 @@ class Map:
 
     def render(self, screen, camera):
         view = screen.get_rect()
+        origin = camera.apply(0, 0)
         for region, rect in self.corridors:
             wall_rect = pg.Rect(camera.apply(rect.x, rect.y), rect.size).inflate(24, 24)
             if view.colliderect(wall_rect):
@@ -167,13 +173,21 @@ class Map:
                     red, green, blue = REGIONS[region][1]
                     colour = (red * 3 // 4, green * 3 // 4, blue * 3 // 4)
                 pg.draw.rect(screen, colour, visible_rect)
+                if region == 0:
+                    self.ruins_art.draw_floor(screen, visible_rect, view, origin)
         for name, region, rect in self.room_floors:
             visible_rect = pg.Rect(camera.apply(rect.x, rect.y), rect.size)
             if view.colliderect(visible_rect):
                 pg.draw.rect(screen, REGIONS[region][1], visible_rect)
+                if region == 0:
+                    self.ruins_art.draw_floor(screen, visible_rect, view, origin)
         for first_region, second_region, x, y in GATES:
+            if (x, y) == (GATE_X, GATE_Y):
+                continue
             gate_x, gate_y = camera.apply(x, y)
             pg.draw.rect(screen, (197, 168, 105), (gate_x - 6, gate_y - 6, 12, 12))
+        self.ruins_art.render(screen, camera)
+        self.gate.render(screen, camera)
 
     #
 
