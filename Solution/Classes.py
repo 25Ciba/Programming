@@ -295,10 +295,10 @@ class Player(pg.sprite.Sprite):
 
         #Rogue
 
-        self.idle_frames = load_player_animation("Rogue", "idle")
-        self.run_frames = load_player_animation("Rogue", "run")
-        self.attack_frames = load_player_animation("Rogue", "attack")
-        self.shield_frames = load_player_animation("Rogue", "shield")   
+        # self.idle_frames = load_player_animation("Rogue", "idle")
+        # self.run_frames = load_player_animation("Rogue", "run")
+        # self.attack_frames = load_player_animation("Rogue", "attack")
+        # self.shield_frames = load_player_animation("Rogue", "shield")   
 
         self.white_shield_frames = []
         for frame in self.shield_frames:
