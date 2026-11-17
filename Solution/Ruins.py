@@ -39,6 +39,19 @@ LAMPS = [
 ]
 
 
+# Enemy type and home coordinates. Lantern Shelter stays clear of enemies.
+HABITATS = [
+    ("Common", 10320, 10620),
+    ("Common", 10440, 10510),
+    ("Common", 11440, 10620),
+    ("Common", 11320, 10510),
+    ("Strong", 8530, 11090),
+    ("Common", 8750, 11090),
+    ("Strong", 10700, 13350),
+    ("Common", 11060, 13400)
+]
+
+
 class RuinsGate:
 
     def __init__(self):
@@ -215,3 +228,4 @@ class RuinsArt:
             if (player.x - x) < 160 and (player.y - y) < 135:
                 return label, message
         return None
+

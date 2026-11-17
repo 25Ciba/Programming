@@ -2,7 +2,7 @@ import pygame as pg
 import random
 import math
 from pathlib import Path
-from Ruins import RuinsArt, RuinsGate, GATE_X, GATE_Y
+from Ruins import RuinsArt, RuinsGate, GATE_X, GATE_Y, HABITATS
 from DungeonLayout import REGIONS, ROOMS, CORRIDORS, GATES, BOSS_ROOMS, START_X, START_Y
 
 ###
@@ -295,10 +295,10 @@ class Player(pg.sprite.Sprite):
 
         #Rogue
 
-        # self.idle_frames = load_player_animation("Rogue", "idle")
-        # self.run_frames = load_player_animation("Rogue", "run")
-        # self.attack_frames = load_player_animation("Rogue", "attack")
-        # self.shield_frames = load_player_animation("Rogue", "shield")   
+        self.idle_frames = load_player_animation("Rogue", "idle")
+        self.run_frames = load_player_animation("Rogue", "run")
+        self.attack_frames = load_player_animation("Rogue", "attack")
+        self.shield_frames = load_player_animation("Rogue", "shield")   
 
         self.white_shield_frames = []
         for frame in self.shield_frames:
@@ -545,13 +545,21 @@ class Projectile:
 # Enemy
 
 class Enemy:
-    def __init__(self, screen, enemy_type, player, game_map=None):
+    def __init__(self, screen, enemy_type, player, game_map=None, home=None):
 
         self.screen = screen
         self.player = player
         self.game_map = game_map
         self.enemy_type = enemy_type
-        self.x, self.y = self.random_spawn_position()
+        if home is None:
+            self.x, self.y = self.random_spawn_position()
+        else:
+            self.x, self.y = home
+        self.home_x = self.x
+        self.home_y = self.y
+        self.detection_range = 410
+        self.home_range = 560
+        self.moving = False
         self.set_stats()
         self.attack_cooldown = 0
         self.attack_delay = 2.0
@@ -624,17 +632,26 @@ class Enemy:
         self.animation_time += dt
         self.attack_cooldown = max(0, self.attack_cooldown - dt)
         self.attack_animation_time = max(0, self.attack_animation_time - dt)
-        self.move_towards_player(dt)
+        self.moving = False
         if self.attack_type == "projectile":
             self.update_projectiles(dt)
+        player_distance = abs(self.player.x - self.x)
+        home_distance = math.hypot(self.player.x - self.home_x, self.player.y - self.home_y)
+        if player_distance > self.detection_range or home_distance > self.home_range:
+            self.move_towards(self.home_x, self.home_y, dt, 3)
+            return
+        stop_distance = self.attack_range
+        if self.attack_type == "melee":
+            stop_distance += self.player.size + self.size - 6
+        self.move_towards(self.player.x, self.player.y, dt, stop_distance)
         self.check_attack()
 
     #
 
-    def move_towards_player(self, dt):
+    def move_towards(self, target_x, target_y, dt, stop_distance):
 
-        dx = self.player.x - self.x
-        dy = self.player.y - self.y
+        dx = target_x - self.x
+        dy = target_y - self.y
         direction = pg.Vector2(dx, dy)
         if direction.length() == 0:
             return
@@ -644,9 +661,12 @@ class Enemy:
             self.facing_row = 0 if dy > 0 else 3
         distance = direction.length()
         direction = direction.normalize()
-        move_x = direction.x * self.speed * dt
-        move_y = direction.y * self.speed * dt
-        if distance > self.attack_range:
+        step = min(self.speed * dt, max(0, distance - stop_distance))
+        move_x = direction.x * step
+        move_y = direction.y * step
+        old_x = self.x
+        old_y = self.y
+        if distance > stop_distance:
             if self.game_map is None:
                 self.x += move_x
                 self.y += move_y
@@ -655,6 +675,7 @@ class Enemy:
                     self.x += move_x
                 if self.game_map.can_move_circle(self.x, self.y + move_y, self.size):
                     self.y += move_y
+        self.moving = self.x != old_x or self.y != old_y
 
     #
     
@@ -709,8 +730,7 @@ class Enemy:
             frame_number = min(len(frames) - 1, frame_number)
             frame = frames[frame_number]
         else:
-            distance = math.hypot(self.player.x - self.x, self.player.y - self.y)
-            if distance > self.attack_range:
+            if self.moving:
                 frames = self.run_frames[self.facing_row]
                 frame = frames[int(self.animation_time * 10) % len(frames)]
             else:
@@ -747,43 +767,24 @@ class EnemyManager:
         self.player = player
         self.game_map = game_map
         self.enemies = []
-        self.spawn_timer = 0
-        self.spawn_delay = 2.0
+        for enemy_type, home_x, home_y in HABITATS:
+            enemy = Enemy(screen, enemy_type, player, game_map, (home_x, home_y))
+            self.enemies.append(enemy)
 
     #
 
     def update(self, dt):
 
-        self.spawn_timer -= dt
-        if self.spawn_timer <= 0:
-            self.spawn_enemy()
-            self.spawn_timer = self.spawn_delay
-        enemies_to_update = self.enemies[:]
-        for enemy in enemies_to_update:
-            enemy.update(dt)
+        for enemy in self.enemies[:]:
             if enemy.current_hp <= 0:
                 self.enemies.remove(enemy)
-    
-    #
-
-    def spawn_enemy(self):
-
-        roll = random.randint(1, 100)
-        if roll <= 70:
-            enemy_type = "Common"
-        elif roll <= 90:
-            enemy_type = "Strong"
-        elif roll <= 98:
-            enemy_type = "Elite"
-        else:
-            enemy_type = "Boss"
-
-        enemy = Enemy(self.screen, enemy_type, self.player, self.game_map)
-        self.enemies.append(enemy)
+            else:
+                enemy.update(dt)
 
     #
 
     def render(self, camera):
+
         for enemy in self.enemies:
             enemy.render(camera)
 
@@ -803,4 +804,5 @@ class Background:
 
     def render(self, screen, camera):
         screen.blit(self.image, camera.apply(self.rect.x, self.rect.y))
+
 

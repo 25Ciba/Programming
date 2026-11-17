@@ -138,3 +138,4 @@ BOSS_ROOMS = [
     "Harp Chamber",
     "Performance Hall"
 ]
+
