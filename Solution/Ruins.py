@@ -212,6 +212,6 @@ class RuinsArt:
     def nearby_readable(self, player):
 
         for x, y, label, message in READABLES:
-            if abs(player.x - x) < 160 and abs(player.y - y) < 135:
+            if (player.x - x) < 160 and (player.y - y) < 135:
                 return label, message
         return None

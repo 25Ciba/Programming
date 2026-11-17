@@ -122,6 +122,7 @@ while running:
         pg.draw.rect(screen, (20, 24, 34), message_box)
         screen.blit(message_text, message_text.get_rect(center=message_box.center))
 
+    # Tellsyou the location of where you are on the map
     location = small_font.render(game_map.location_name(player.x, player.y), True, (238, 242, 247))
     location_box = location.get_rect(topright=(WIDTH - 24, 24))
     pg.draw.rect(screen, (20, 24, 34), location_box.inflate(20, 12))
