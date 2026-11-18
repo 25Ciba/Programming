@@ -34,7 +34,6 @@ fog_surface = pg.Surface((WIDTH, HEIGHT), pg.SRCALPHA)
 # Main game loop
 while running:
     dt = min(clock.tick(60) / 1000, 0.05)
-
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
@@ -91,14 +90,12 @@ while running:
     pg.draw.rect(screen, (74, 80, 91), (24, 25, 230, 18))
     hp_percentage = player.current_hp / player.max_hp
     pg.draw.rect(screen, (190, 62, 78), (24, 25, 230 * hp_percentage, 18))
-
     hp_text = font.render(f"HP: {player.current_hp} / {player.max_hp}", True, (238, 242, 247))
     screen.blit(hp_text, (24, 49))
     defence_text = small_font.render(f"Defence: {player.defence}", True, (214, 224, 236))
     screen.blit(defence_text, (24, 76))
     lives_text = small_font.render(f"Lives: {player.current_lives} / {player.max_lives}", True, (214, 224, 236))
     screen.blit(lives_text, (24, 99))
-
     if player.block_cooldown <= 0:
         block_cooldown = "ready"
     else:
@@ -107,7 +104,6 @@ while running:
         dash_cooldown = "ready"
     else:
         dash_cooldown = f"{player.dash_cooldown:.1f}s"
-
     screen.blit(small_font.render(f"Block: {block_cooldown}", True, (210, 225, 242)), (24, 121))
     screen.blit(small_font.render(f"Dash: {dash_cooldown}", True, (210, 225, 242)), (145, 121))
 
@@ -135,4 +131,3 @@ while running:
     pg.display.flip()
 
 pg.quit()
-

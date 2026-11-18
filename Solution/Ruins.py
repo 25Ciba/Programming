@@ -1,13 +1,15 @@
 import pygame as pg
 import random
 
-# The north route from the Blue-Grey Ruins to Frost Organ.
+###
+
 GATE_X = 10880
 GATE_Y = 7360
 SHRINE_X = 11060
 SHRINE_Y = 8500
 
-# Floor markings give each starter room a recognisable landmark.
+#
+
 INLAYS = [
     (10880, 10880, 92),
     (8640, 10880, 68),
@@ -15,6 +17,7 @@ INLAYS = [
     (10880, 13120, 52)
 ]
 
+#
 
 READABLES = [
     (SHRINE_X, SHRINE_Y, "Read the shrine", "Leave one lantern lit. The orchestra will find its way home."),
@@ -24,11 +27,15 @@ READABLES = [
     (10880, 13290, "Read the waystone", "Follow the dry echoes west. Follow the returning echoes east.")
 ]
 
+#
+
 BENCHES = [
     (10600, 8490), (10600, 8790),
     (10520, 11060), (10520, 11168), (10520, 11276),
     (11240, 11060), (11240, 11168), (11240, 11276)
 ]
+
+#
 
 LAMPS = [
     (10715, 8100), (11045, 8100), (10715, 9020), (11045, 9020),
@@ -38,8 +45,8 @@ LAMPS = [
     (10720, 12850), (11040, 12850), (10720, 13320), (11040, 13320)
 ]
 
+#
 
-# Enemy type and home coordinates. Lantern Shelter stays clear of enemies.
 HABITATS = [
     ("Common", 10320, 10620),
     ("Common", 10440, 10510),
@@ -51,6 +58,7 @@ HABITATS = [
     ("Common", 11060, 13400)
 ]
 
+###
 
 class RuinsGate:
 
@@ -109,6 +117,7 @@ class RuinsGate:
             pg.draw.rect(screen, (84, 99, 115), (px - 12, py - 55, 24, 36))
             pg.draw.rect(screen, (197, 155, 87), (px - 5, py - 32, 10, 8))
 
+###
 
 class RuinsArt:
 

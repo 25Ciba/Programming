@@ -804,5 +804,3 @@ class Background:
 
     def render(self, screen, camera):
         screen.blit(self.image, camera.apply(self.rect.x, self.rect.y))
-
-

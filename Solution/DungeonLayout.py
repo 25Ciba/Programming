@@ -1,4 +1,3 @@
-# Rooms are stored as (name, region, x, y, width, height).
 REGIONS = [
     ('Blue-Grey Ruins', (54, 69, 90)),
     ('Frost Organ', (77, 106, 119)),
@@ -8,6 +7,8 @@ REGIONS = [
     ('Flooded Strings', (56, 96, 101)),
     ('Golden Hall', (122, 104, 63)),
 ]
+
+#
 
 ROOMS = [
     ('Rehearsal Plaza', 0, 9600, 9728, 2560, 2304),
@@ -54,7 +55,8 @@ ROOMS = [
 
 ]
 
-# Corridors are stored as (region, x, y, width, height).
+#
+
 CORRIDORS = [
     (0, 10592, 8352, 576, 2816),
     (0, 8352, 10592, 2816, 576),
@@ -110,7 +112,8 @@ CORRIDORS = [
     (-1, 12832, 17632, 3136, 576),
 ]
 
-# Planned gate locations are open crossings in the layout pass.
+#
+
 GATES = [
     (0, 1, 10880, 7360),
     (0, 2, 7360, 10880),
@@ -125,10 +128,13 @@ GATES = [
     (5, 6, 14400, 17920),
 ]
 
+#
+
 START_X = 10880
 START_Y = 8640
 
-# The first arena is for the easier boss. The others are Ultra Boss arenas.
+#
+
 BOSS_ROOMS = [
     "Overture Arena",
     "Organ Chamber",
@@ -138,4 +144,3 @@ BOSS_ROOMS = [
     "Harp Chamber",
     "Performance Hall"
 ]
-
